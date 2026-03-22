@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from config import (
+from config.scraper_config import (
     OUTPUT_DIRS,
     REDDIT_MIN_SCORE,
     REDDIT_SEARCH_QUERIES,

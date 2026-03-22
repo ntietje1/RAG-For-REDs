@@ -1,6 +1,6 @@
 import time
 
-from config import OUTPUT_DIRS, RATE_LIMITS
+from config.scraper_config import OUTPUT_DIRS, RATE_LIMITS
 from scrapers.base import BaseScraper
 
 # Lolalytics uses its own patch numbering: Riot 25.x = Lola 15.x, Riot 26.x = Lola 16.x

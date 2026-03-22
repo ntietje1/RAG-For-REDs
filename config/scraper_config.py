@@ -1,7 +1,4 @@
-from pathlib import Path
-
-BASE_DIR = Path(__file__).parent
-DATA_DIR = BASE_DIR / "data"
+from config.settings import DATA_DIR
 
 OUTPUT_DIRS = {
     "patch_notes": DATA_DIR / "patch_notes",
@@ -9,8 +6,6 @@ OUTPUT_DIRS = {
     "reddit": DATA_DIR / "reddit",
     "stats": DATA_DIR / "stats",
 }
-
-USER_AGENT = "RAG-For-REDs/1.0 (League of Legends research project)"
 
 # Rate limits (seconds between requests)
 RATE_LIMITS = {
