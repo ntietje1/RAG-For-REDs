@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 
-from config import (
+from config.scraper_config import (
     OUTPUT_DIRS,
     RATE_LIMITS,
     RIOT_BASE_URL,

@@ -5,3 +5,7 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+*.egg-info/
+dist/
+build/
+results/eval_runs/

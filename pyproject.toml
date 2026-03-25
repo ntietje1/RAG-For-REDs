@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rag-for-reds"
+version = "0.1.0"
+description = "RAG for Rapidly Evolving Domains — using League of Legends as evaluation environment"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+]
+
+[project.optional-dependencies]
+pipeline = [
+    "openai>=1.0.0",
+    "chromadb>=0.4.0",
+    "langchain>=0.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["config*", "scrapers*", "processing*", "indexing*", "retrieval*", "evaluation*"]

@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from config import USER_AGENT
+from config.settings import USER_AGENT
 
 logging.basicConfig(
     level=logging.INFO,

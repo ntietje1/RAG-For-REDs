@@ -2,7 +2,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from config import OUTPUT_DIRS, RATE_LIMITS, WIKI_API_URL
+from config.scraper_config import OUTPUT_DIRS, RATE_LIMITS, WIKI_API_URL
 from scrapers.base import BaseScraper
 
 
