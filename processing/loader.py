@@ -19,6 +19,7 @@ class Document:
 
     text: str
     source: str
+    doc_id: str = ""
     url: str = ""
     date: str = ""
     patch_version: str = ""
@@ -56,19 +57,16 @@ def _load_patch_notes(raw: dict) -> list[Document]:
             continue
 
         text = f"{heading}\n{body}" if heading else body
-        # doc_id is a stable, unique identifier for Qdrant upserts,
-        # formatted as {source}_{url_hash}_{index} to prevent collisions.
-        doc_id = f"riot_patch_notes_{_url_hash(url)}_{i}"
         docs.append(
             Document(
                 text=text,
                 source="riot_patch_notes",
+                doc_id=f"riot_patch_notes_{_url_hash(url)}_{i}",
                 url=url,
                 date=date,
                 patch_version=patch_version,
                 content_type="patch_notes",
                 metadata={
-                    "doc_id": doc_id,
                     "heading": heading,
                     "section_index": i,
                 },
@@ -90,17 +88,16 @@ def _load_wiki(raw: dict) -> list[Document]:
     if len(text) < 50:
         return []
 
-    doc_id = f"wiki_{_url_hash(url)}_0"
     return [
         Document(
             text=text,
             source="wiki",
+            doc_id=f"wiki_{_url_hash(url)}_0",
             url=url,
             date=meta.get("date") or "",
             patch_version=meta.get("patch_version") or "",
             content_type="wiki_page",
             metadata={
-                "doc_id": doc_id,
                 "title": content.get("title", ""),
                 "categories": content.get("categories", []),
             },
@@ -117,17 +114,16 @@ def _load_reddit(raw: dict) -> list[Document]:
     if not text.strip():
         return []
 
-    doc_id = f"reddit_{_url_hash(url)}_0"
     return [
         Document(
             text=text,
             source="reddit",
+            doc_id=f"reddit_{_url_hash(url)}_0",
             url=url,
             date=meta.get("date") or "",
             patch_version=meta.get("patch_version") or "",
             content_type="reddit_post",
             metadata={
-                "doc_id": doc_id,
                 "title": content.get("title", ""),
                 "score": content.get("score", 0),
                 "num_comments": content.get("num_comments", 0),
@@ -147,17 +143,16 @@ def _load_stats(raw: dict) -> list[Document]:
     docs: list[Document] = []
     for i, champ in enumerate(champions):
         text = serialize_stats_champion(champ, patch_version)
-        doc_id = f"lolalytics_{_url_hash(url)}_{i}"
         docs.append(
             Document(
                 text=text,
                 source="lolalytics",
+                doc_id=f"lolalytics_{_url_hash(url)}_{i}",
                 url=url,
                 date=meta.get("date") or "",
                 patch_version=patch_version,
                 content_type="champion_stats",
                 metadata={
-                    "doc_id": doc_id,
                     "champion_name": champ.get("name", ""),
                     "tier": champ.get("tier", ""),
                     "lane": champ.get("lane", ""),
