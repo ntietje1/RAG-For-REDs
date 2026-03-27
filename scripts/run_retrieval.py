@@ -2,9 +2,8 @@
 
 import argparse
 import sys
-from pathlib import Path
 
-from config.pipeline_config import TOP_K, VECTOR_STORE_DIR
+from config.pipeline_config import TOP_K
 from indexing.store import VectorStore
 from retrieval.baseline import BaselineRAG
 
@@ -37,19 +36,13 @@ def main():
         default=TOP_K,
         help=f"Number of chunks to retrieve (default: {TOP_K})",
     )
-    parser.add_argument(
-        "--store-dir",
-        type=Path,
-        default=VECTOR_STORE_DIR,
-        help="Qdrant on-disk store directory (default: data/indices)",
-    )
     args = parser.parse_args()
 
     if args.pipeline == "temporal":
         print("Error: temporal pipeline is not yet implemented.")
         sys.exit(1)
 
-    store = VectorStore(args.store_dir)
+    store = VectorStore()
     pipeline = BaselineRAG(store=store, top_k=args.top_k)
 
     if args.query:

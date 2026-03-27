@@ -6,10 +6,11 @@ CHUNK_OVERLAP = 64
 
 # Embedding
 EMBEDDING_MODEL = "openai/text-embedding-3-small"
-EMBEDDING_DIMENSION = 1536
+EMBEDDING_DIMENSION = 1536          # text-embedding-3-small output dimension
 
-# Vector store
-VECTOR_STORE_DIR = DATA_DIR / "indices"
+# Vector store — local Qdrant Docker server
+# The storage volume is mounted at "data/db" inside the container.
+QDRANT_URL = "http://localhost:6333"
 
 # Generation
 GENERATION_MODEL = "google/gemini-3-flash-preview"

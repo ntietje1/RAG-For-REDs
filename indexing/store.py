@@ -1,7 +1,6 @@
-"""Vector store backed by Qdrant in local on-disk mode."""
+"""Vector store backed by a local Qdrant server."""
 
 import uuid
-from pathlib import Path
 
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
@@ -13,20 +12,17 @@ from qdrant_client.models import (
     VectorParams,
 )
 
+from config.pipeline_config import EMBEDDING_DIMENSION, QDRANT_URL
 from processing.loader import Document
 
 _COLLECTION = "chunks"
-_VECTOR_SIZE = 1536  # text-embedding-3-small output dimension
-
 
 
 class VectorStore:
-    """Qdrant-backed vector store using local on-disk persistence."""
+    """Qdrant-backed vector store connecting to a local Qdrant server."""
 
-    def __init__(self, store_dir: Path):
-        self.store_dir = Path(store_dir)
-        self.store_dir.mkdir(parents=True, exist_ok=True)
-        self._client = QdrantClient(path=str(self.store_dir))
+    def __init__(self) -> None:
+        self._client = QdrantClient(url=QDRANT_URL)
         self._ensure_collection()
 
     def _ensure_collection(self) -> None:
@@ -34,7 +30,7 @@ class VectorStore:
         if _COLLECTION not in existing:
             self._client.create_collection(
                 collection_name=_COLLECTION,
-                vectors_config=VectorParams(size=_VECTOR_SIZE, distance=Distance.COSINE),
+                vectors_config=VectorParams(size=EMBEDDING_DIMENSION, distance=Distance.COSINE),
             )
 
     @staticmethod
