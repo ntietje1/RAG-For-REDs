@@ -9,3 +9,4 @@ venv/
 dist/
 build/
 results/eval_runs/
+data.zip

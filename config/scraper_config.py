@@ -45,19 +45,25 @@ REDDIT_TOP_LIMIT = 500
 
 
 def generate_patch_versions():
-    """Generate patch version strings for ~1 year back.
+    """Generate patch version strings covering 2024 through current.
 
-    2025 season started with S1 patches, then numbered patches from 25.17 onward.
+    2024 season (14.x): Riot used season-based numbering, no leading zeros in URLs.
+    2025 season: S1.1-S1.3 for first three patches, then 25.04-25.24 with leading zeros.
+    2026 season: 26.1 through current.
     """
     versions = []
 
-    # Season 2025 special patches (S1.1 and S1.2 confirmed, S1.3 may not exist)
+    # 2024 season patches (Riot used season 14 numbering, no leading zeros)
+    for i in range(1, 25):
+        versions.append(f"14.{i}")
+
+    # 2025 season: first three patches used S1 naming
     for i in range(1, 4):
         versions.append(f"25.S1.{i}")
 
-    # 2025 numbered patches start at 25.17 (not 25.01)
-    for i in range(17, 25):
-        versions.append(f"25.{i}")
+    # 2025 numbered patches (25.04 onward, leading zeros for single digits)
+    for i in range(4, 25):
+        versions.append(f"25.{i:02d}")
 
     # 2026 patches (26.1 through current ~26.6)
     for i in range(1, 7):
@@ -67,9 +73,8 @@ def generate_patch_versions():
 
 
 def patch_version_to_slug(version):
-    """Convert a patch version like '25.S1.3' or '25.04' to URL slug like '25-s1-3' or '25-4'."""
-    slug = version.lower().replace(".", "-")
-    # Remove leading zeros in patch number (25-04 -> 25-4)
-    parts = slug.split("-")
-    parts = [p.lstrip("0") or "0" for p in parts]
-    return "-".join(parts)
+    """Convert a patch version like '25.S1.3' or '25.04' to URL slug like '25-s1-3' or '25-04'.
+
+    Preserves leading zeros since Riot URLs require them (e.g. patch-25-04-notes, not patch-25-4-notes).
+    """
+    return version.lower().replace(".", "-")

@@ -3,10 +3,15 @@ import time
 from config.scraper_config import OUTPUT_DIRS, RATE_LIMITS
 from scrapers.base import BaseScraper
 
-# Lolalytics uses its own patch numbering: Riot 25.x = Lola 15.x, Riot 26.x = Lola 16.x
+# Lolalytics uses season-based numbering: season 14 = 2024, season 15 = 2025, season 16 = 2026.
+# In 2024, Riot also used season numbering (14.x), so Lola and Riot match.
+# In 2025+, Riot switched to year-based (25.x), so Lola 15.x = Riot 25.x.
 LOLALYTICS_PATCHES = []
-# 2025 season: 15.17 through 15.24
-for i in range(17, 25):
+# 2024 season: 14.1 through 14.24 (same numbering as Riot)
+for i in range(1, 25):
+    LOLALYTICS_PATCHES.append(f"14.{i}")
+# 2025 season: 15.1 through 15.24
+for i in range(1, 25):
     LOLALYTICS_PATCHES.append(f"15.{i}")
 # 2026 season: 16.1 through 16.6
 for i in range(1, 7):
@@ -14,8 +19,15 @@ for i in range(1, 7):
 
 # Map Lolalytics patch -> Riot patch for metadata
 LOLA_TO_RIOT = {}
-for i in range(17, 25):
-    LOLA_TO_RIOT[f"15.{i}"] = f"25.{i}"
+# 2024: Riot and Lolalytics both use 14.x
+for i in range(1, 25):
+    LOLA_TO_RIOT[f"14.{i}"] = f"14.{i}"
+# 2025: first 3 patches had S1 naming, rest are numbered with leading zeros
+for i in range(1, 4):
+    LOLA_TO_RIOT[f"15.{i}"] = f"25.S1.{i}"
+for i in range(4, 25):
+    LOLA_TO_RIOT[f"15.{i}"] = f"25.{i:02d}"
+# 2026
 for i in range(1, 7):
     LOLA_TO_RIOT[f"16.{i}"] = f"26.{i}"
 
