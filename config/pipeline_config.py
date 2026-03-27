@@ -12,7 +12,7 @@ EMBEDDING_DIMENSION = 1536
 VECTOR_STORE_DIR = DATA_DIR / "indices"
 
 # Generation
-GENERATION_MODEL = "google/gemini-2.0-flash"
+GENERATION_MODEL = "google/gemini-3-flash-preview"
 TOP_K = 5
 
 # Source authority weights (used by temporal-aware retrieval)

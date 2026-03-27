@@ -96,9 +96,9 @@ class VectorStore:
         top_k: int,
         query_filter: Filter | None,
     ) -> list[dict]:
-        results = self._client.search(
+        response = self._client.query_points(
             collection_name=_COLLECTION,
-            query_vector=embedding,
+            query=embedding,
             limit=top_k,
             query_filter=query_filter,
             with_payload=True,
@@ -108,7 +108,7 @@ class VectorStore:
                 "score": hit.score,
                 **hit.payload,
             }
-            for hit in results
+            for hit in response.points
         ]
 
     def clear(self) -> None:
