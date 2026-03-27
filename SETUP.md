@@ -55,9 +55,26 @@ The server mounts `data/db/` as its storage volume, so the index persists across
 
 ---
 
+### Restore Qdrant from a snapshot
+
+Use this when you already have a Qdrant snapshot file for the `chunks` collection and want to avoid re-indexing.
+
+1. Start the Qdrant server with `docker compose up -d`.
+2. Open the Qdrant dashboard in your browser at `http://localhost:6333/dashboard`.
+3. Go to the `Collections` view.
+4. If a `chunks` collection already exists and you want to replace it, delete that collection first.
+5. Use the snapshot restore / upload action in the dashboard.
+6. Select your `chunks.snapshot` file and restore it into a collection named `chunks`.
+7. Wait for the restore to complete, then confirm in the dashboard that the `chunks` collection exists and shows a non-zero point count.
+
+If the restored collection already has points, skip indexing and move directly to retrieval.
+
+---
+
 ## Step 3 — Build the vector index
 
 Embeds the processed chunks and upserts them into the running Qdrant server.
+Skip this step if you restored a valid snapshot and confirmed the collection already has points.
 
 ```bash
 # Incremental upsert (safe to re-run; existing points are overwritten by stable ID)
