@@ -21,4 +21,4 @@ pipeline = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["config*", "scrapers*", "processing*", "indexing*", "retrieval*", "evaluation*"]
+include = ["config*", "scrapers*", "scripts*", "processing*", "indexing*", "retrieval*", "evaluation*"]
