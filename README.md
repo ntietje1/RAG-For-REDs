@@ -55,6 +55,103 @@ Out of scope:
 - Finalize the technical report and discuss qualitative generalizability.
 - Submit the final project documentation and codebase.
 
+## Running the Pipeline
+
+### Prerequisites
+
+Install the pipeline dependencies (requires Python 3.10+):
+
+```bash
+pip install -e ".[pipeline]"
+```
+
+Copy `.env.example` to `.env` and populate your API keys:
+
+```
+OPENROUTER_API_KEY=your_key_here
+```
+
+---
+
+### Step 1 — Process raw data into chunks
+
+Reads raw scraped JSON files from `data/`, cleans them, and writes chunked documents to `data/processed/chunks.jsonl`.
+
+```bash
+# Process all sources
+python scripts/run_processing.py
+
+# Process a single source
+python scripts/run_processing.py --source patch_notes
+python scripts/run_processing.py --source wiki
+python scripts/run_processing.py --source reddit
+python scripts/run_processing.py --source stats
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--source` | `all` | Which source to process (`patch_notes`, `wiki`, `reddit`, `stats`, `all`) |
+| `--raw-dir` | `data/raw` | Root directory of raw scraped JSON files |
+| `--output` | `data/processed/chunks.jsonl` | Output JSONL path |
+
+> **Note:** raw data currently lives directly in `data/` (not `data/raw/`). Pass `--raw-dir data` if you have not moved the source directories.
+
+---
+
+### Step 2 — Build the vector index
+
+Embeds the processed chunks and upserts them into a local Qdrant store at `data/indices/`.
+
+```bash
+# Incremental upsert (safe to re-run; existing points are overwritten by stable ID)
+python scripts/run_indexing.py
+
+# Full rebuild from scratch
+python scripts/run_indexing.py --rebuild
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--chunks` | `data/processed/chunks.jsonl` | Input JSONL produced by Step 1 |
+| `--store-dir` | `data/indices` | Qdrant on-disk store directory |
+| `--batch-size` | `100` | Number of chunks per embedding API call |
+| `--rebuild` | off | Clear the index before inserting |
+
+---
+
+### Step 3 — Query the pipeline
+
+**Single query:**
+
+```bash
+python scripts/run_retrieval.py --pipeline baseline --query "What changed for Zeri in patch 25.23?"
+```
+
+**Interactive mode** (omit `--query`):
+
+```bash
+python scripts/run_retrieval.py --pipeline baseline
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--pipeline` | *(required)* | `baseline` (temporal not yet implemented) |
+| `--query` | — | Single question; omit for interactive REPL |
+| `--top-k` | `5` | Number of chunks to retrieve |
+| `--store-dir` | `data/indices` | Qdrant store to query against |
+
+---
+
+### Running all steps in sequence
+
+```bash
+python scripts/run_processing.py --raw-dir data && \
+python scripts/run_indexing.py --rebuild && \
+python scripts/run_retrieval.py --pipeline baseline
+```
+
+---
+
 ## Data & Resources
 
 ### Core Knowledge Sources
@@ -65,10 +162,10 @@ Out of scope:
 
 ### Technical Stack
 
-- Large Language Model: Gemini Flash for the classification and generation components.
-- Embedding Model: `text-embedding-3-small` for high-efficiency vectorization.
-- Vector Database: ChromaDB or Pinecone for storing indexed chunks with metadata.
-- Orchestration: LangChain/LlamaIndex for managing the retrieval and weighting pipeline.
+- Large Language Model: `gemini-2.0-flash` via OpenRouter for generation.
+- Embedding Model: `text-embedding-3-small` via OpenRouter for vectorization.
+- Vector Database: Qdrant (local on-disk mode) for storing indexed chunks with metadata.
+- Routing: OpenRouter unified API for both embedding and generation calls.
 
 ### Evaluation Dataset
 
