@@ -62,7 +62,7 @@ Out of scope:
 Install the pipeline dependencies (requires Python 3.10+):
 
 ```bash
-pip install -e ".[pipeline]"
+pip install -e "."
 ```
 
 Copy `.env.example` to `.env` and populate your API keys:
