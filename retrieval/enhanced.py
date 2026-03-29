@@ -20,12 +20,14 @@ class EnhancedRAG:
         store: VectorStore,
         use_temporal: bool = True,
         use_authority: bool = True,
+        use_expansion: bool = True,
         candidate_k: int = RERANK_CANDIDATE_K,
         final_k: int = TOP_K,
     ):
         self.store = store
         self.use_temporal = use_temporal
         self.use_authority = use_authority
+        self.use_expansion = use_expansion
         self.candidate_k = candidate_k
         self.final_k = final_k
 
@@ -40,7 +42,8 @@ class EnhancedRAG:
         logger.info("Classification: %s", classification)
 
         # embed the original query + alternate phrasings, retrieve for each and merge
-        all_queries = [question] + classification.get("alternate_queries", [])
+        alt = classification.get("alternate_queries", []) if self.use_expansion else []
+        all_queries = [question] + alt
         seen: dict[str, dict] = {}  # doc_id -> best so far
         for q in all_queries:
             embedding = embed_query(q)
@@ -71,6 +74,9 @@ class EnhancedRAG:
             }
             for r in results
         ]
+
+        if not self.use_expansion:
+            classification.pop("alternate_queries", None)
 
         return {
             "answer": answer,

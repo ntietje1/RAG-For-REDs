@@ -55,10 +55,17 @@ def main():
         default=TOP_K,
         help=f"Number of chunks to retrieve (default: {TOP_K})",
     )
+    parser.add_argument(
+        "--no-expansion",
+        action="store_true",
+        help="Disable query expansion (alternate phrasings)",
+    )
     args = parser.parse_args()
 
     store = VectorStore()
     mode = PIPELINE_MODES[args.pipeline]
+
+    use_expansion = (not args.no_expansion)
 
     if args.pipeline == "baseline":
         pipeline = BaselineRAG(store=store, top_k=args.top_k)
@@ -67,6 +74,7 @@ def main():
             store=store,
             use_temporal=mode["use_temporal"],
             use_authority=mode["use_authority"],
+            use_expansion=use_expansion,
             final_k=args.top_k,
         )
 
