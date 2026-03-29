@@ -36,11 +36,19 @@ class EnhancedRAG:
 
     def query(self, question: str) -> dict:
         """Run the enhanced RAG pipeline and return answer, sources, and classification."""
-        classification = classify_query(question)
+        classification = classify_query(question, self.current_patch)
         logger.info("Classification: %s", classification)
 
-        embedding = embed_query(question)
-        candidates = self.store.query(embedding, top_k=self.candidate_k)
+        # embed the original query + alternate phrasings, retrieve for each and merge
+        all_queries = [question] + classification.get("alternate_queries", [])
+        seen: dict[str, dict] = {}  # doc_id -> best so far
+        for q in all_queries:
+            embedding = embed_query(q)
+            for hit in self.store.query(embedding, top_k=self.candidate_k):
+                doc_id = hit.get("doc_id", id(hit))
+                if doc_id not in seen or hit["score"] > seen[doc_id]["score"]:
+                    seen[doc_id] = hit
+        candidates = list(seen.values())
 
         results = rerank(
             candidates=candidates,
@@ -52,7 +60,7 @@ class EnhancedRAG:
         )
 
         context_chunks = [r["text"] for r in results]
-        answer = generate_answer(question, context_chunks)
+        answer = generate_answer(question, context_chunks, self.current_patch)
 
         sources = [
             {

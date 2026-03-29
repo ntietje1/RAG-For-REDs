@@ -18,7 +18,11 @@ PIPELINE_MODES = {
 def _print_result(result: dict) -> None:
     classification = result.get("classification")
     if classification:
-        print(f"\nClassification: {classification}")
+        print(f"\nTemporal scope: {classification['temporal_scope']}")
+        print(f"Authority weights: {classification['authority_weights']}")
+        alt = classification.get("alternate_queries", [])
+        if alt:
+            print(f"Alternate queries: {alt}")
 
     print(f"\nAnswer:\n{result['answer']}\n")
     print("Sources:")
