@@ -55,6 +55,12 @@ Out of scope:
 - Finalize the technical report and discuss qualitative generalizability.
 - Submit the final project documentation and codebase.
 
+## Running the Pipeline
+
+See [SETUP.md](SETUP.md) for full installation and usage instructions.
+
+---
+
 ## Data & Resources
 
 ### Core Knowledge Sources
@@ -65,10 +71,10 @@ Out of scope:
 
 ### Technical Stack
 
-- Large Language Model: Gemini Flash for the classification and generation components.
-- Embedding Model: `text-embedding-3-small` for high-efficiency vectorization.
-- Vector Database: ChromaDB or Pinecone for storing indexed chunks with metadata.
-- Orchestration: LangChain/LlamaIndex for managing the retrieval and weighting pipeline.
+- Large Language Model: `gemini-2.0-flash` via OpenRouter for generation.
+- Embedding Model: `text-embedding-3-small` via OpenRouter for vectorization.
+- Vector Database: Qdrant (local Docker server) for storing indexed chunks with metadata.
+- Routing: OpenRouter unified API for both embedding and generation calls.
 
 ### Evaluation Dataset
 
