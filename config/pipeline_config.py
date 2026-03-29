@@ -1,8 +1,8 @@
 from config.settings import DATA_DIR
 
-# Processing
-CHUNK_SIZE = 512
-CHUNK_OVERLAP = 64
+# Processing (in characters)
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 128
 
 # Embedding
 EMBEDDING_MODEL = "openai/text-embedding-3-small"
@@ -16,10 +16,12 @@ QDRANT_URL = "http://localhost:6333"
 GENERATION_MODEL = "google/gemini-3-flash-preview"
 TOP_K = 5
 
-# Source authority weights (used by temporal-aware retrieval)
-SOURCE_AUTHORITY = {
-    "riot_patch_notes": 1.0,
-    "wiki": 0.8,
-    "lolalytics": 0.9,
-    "reddit": 0.5,
+# Re-ranking
+RERANK_CANDIDATE_K = 20  # Retrieve this many candidates before re-ranking
+
+# Temporal decay: score *= e^(-lambda * age_in_patches)
+TEMPORAL_LAMBDA = {
+    "evergreen": 0.0,
+    "mixed": 0.25,
+    "version-sensitive": 0.5,
 }
