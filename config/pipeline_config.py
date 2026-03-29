@@ -1,8 +1,8 @@
 from config.settings import DATA_DIR
 
 # Processing
-CHUNK_SIZE = 512
-CHUNK_OVERLAP = 64
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 128
 
 # Embedding
 EMBEDDING_MODEL = "openai/text-embedding-3-small"
