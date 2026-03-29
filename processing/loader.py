@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -172,8 +173,8 @@ _SOURCE_HANDLERS = {
 
 # public API ─────────────────────────────────────────────────────────────────
 
-def load_source(source_dir: Path) -> list[Document]:
-    """Load all JSON files from a source directory into Documents.
+def stream_source(source_dir: Path) -> Iterator[Document]:
+    """Yield documents one at a time from a source directory.
 
     The directory name determines which per-source handler is used.
     Files that are empty, malformed, or produce no usable content
@@ -186,21 +187,17 @@ def load_source(source_dir: Path) -> list[Document]:
             f"Expected one of: {list(_SOURCE_HANDLERS)}"
         )
 
-    docs: list[Document] = []
     for json_file in sorted(source_dir.glob("*.json")):
         try:
             raw = json.loads(json_file.read_text(encoding="utf-8"))
-            docs.extend(handler(raw))
+            yield from handler(raw)
         except (json.JSONDecodeError, KeyError, TypeError):
             continue
-    return docs
 
 
-def load_all_sources(raw_dir: Path) -> list[Document]:
-    """Load documents from all known source directories under *raw_dir*."""
-    docs: list[Document] = []
+def stream_all_sources(raw_dir: Path) -> Iterator[Document]:
+    """Yield documents from all known source directories under *raw_dir*."""
     for name in _SOURCE_HANDLERS:
         source_dir = raw_dir / name
         if source_dir.is_dir():
-            docs.extend(load_source(source_dir))
-    return docs
+            yield from stream_source(source_dir)
