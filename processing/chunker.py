@@ -20,10 +20,15 @@ def chunk_sentences(
 
     prefix = f"{context_prefix.strip()}\n" if context_prefix.strip() else ""
     effective_size = chunk_size - len(prefix)
+    if effective_size <= 0:
+        raise ValueError(
+            f"chunk_size ({chunk_size}) must be greater than prefix length ({len(prefix)})"
+        )
 
     if len(text) <= effective_size:
         doc = copy.copy(doc)
         doc.text = prefix + text if prefix else text
+        doc.metadata = copy.deepcopy(doc.metadata)
         return [doc]
 
     # split into sentences, then break any large sentences (over chunk size)
