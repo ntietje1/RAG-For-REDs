@@ -52,4 +52,15 @@ def rerank(
         scored.append({**chunk, "adjusted_score": score})
 
     scored.sort(key=lambda c: c["adjusted_score"], reverse=True)
-    return scored[:final_k]
+
+    # keep only the best chunk per source document.
+    seen_docs: set[str] = set()
+    deduped: list[dict] = []
+    for chunk in scored:
+        doc_id = chunk.get("url") or chunk.get("doc_id", "")
+        if doc_id not in seen_docs:
+            seen_docs.add(doc_id)
+            deduped.append(chunk)
+            if len(deduped) == final_k:
+                break
+    return deduped
