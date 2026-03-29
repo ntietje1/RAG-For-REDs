@@ -1,19 +1,34 @@
 """Query a RAG pipeline interactively or in batch mode."""
 
 import argparse
-import sys
 
 from config.pipeline_config import TOP_K
 from indexing.store import VectorStore
 from retrieval.baseline import BaselineRAG
+from retrieval.enhanced import EnhancedRAG
+
+PIPELINE_MODES = {
+    "baseline":  {"use_temporal": False, "use_authority": False},
+    "temporal":  {"use_temporal": True,  "use_authority": False},
+    "authority": {"use_temporal": False, "use_authority": True},
+    "full":      {"use_temporal": True,  "use_authority": True},
+}
 
 
 def _print_result(result: dict) -> None:
+    classification = result.get("classification")
+    if classification:
+        print(f"\nClassification: {classification}")
+
     print(f"\nAnswer:\n{result['answer']}\n")
     print("Sources:")
     for i, src in enumerate(result["sources"], 1):
         score = src.get("score", 0.0)
-        print(f"  [{i}] {src.get('source', '')} — {src.get('url', '')} (score: {score:.3f})")
+        adj = src.get("adjusted_score")
+        score_str = f"cosine: {score:.3f}"
+        if adj is not None:
+            score_str += f", adjusted: {adj:.3f}"
+        print(f"  [{i}] {src.get('source', '')} — {src.get('url', '')} ({score_str})")
     print()
 
 
@@ -21,7 +36,7 @@ def main():
     parser = argparse.ArgumentParser(description="Query the RAG pipeline")
     parser.add_argument(
         "--pipeline",
-        choices=["baseline", "temporal"],
+        choices=list(PIPELINE_MODES),
         required=True,
         help="Which retrieval pipeline to use",
     )
@@ -38,12 +53,18 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.pipeline == "temporal":
-        print("Error: temporal pipeline is not yet implemented.")
-        sys.exit(1)
-
     store = VectorStore()
-    pipeline = BaselineRAG(store=store, top_k=args.top_k)
+    mode = PIPELINE_MODES[args.pipeline]
+
+    if args.pipeline == "baseline":
+        pipeline = BaselineRAG(store=store, top_k=args.top_k)
+    else:
+        pipeline = EnhancedRAG(
+            store=store,
+            use_temporal=mode["use_temporal"],
+            use_authority=mode["use_authority"],
+            final_k=args.top_k,
+        )
 
     if args.query:
         _print_result(pipeline.query(args.query))
