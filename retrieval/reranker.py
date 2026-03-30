@@ -2,7 +2,7 @@
 
 import math
 
-from config.pipeline_config import TEMPORAL_LAMBDA
+from config.pipeline_config import TEMPORAL_LAMBDA, MAX_PER_SOURCE
 
 
 def _patch_sort_key(version: str) -> tuple:
@@ -55,12 +55,18 @@ def rerank(
 
     # keep only the best chunk per source document.
     seen_docs: set[str] = set()
+    source_counts: dict[str, int] = {}
     deduped: list[dict] = []
     for chunk in scored:
         doc_id = chunk.get("url") or chunk.get("doc_id", "")
-        if doc_id not in seen_docs:
-            seen_docs.add(doc_id)
-            deduped.append(chunk)
-            if len(deduped) == final_k:
-                break
+        src = chunk.get("source", "")
+        if doc_id in seen_docs:
+            continue
+        if source_counts.get(src, 0) >= MAX_PER_SOURCE: # don't allow one source to dominate results
+            continue
+        seen_docs.add(doc_id)
+        source_counts[src] = source_counts.get(src, 0) + 1
+        deduped.append(chunk)
+        if len(deduped) == final_k:
+            break
     return deduped
