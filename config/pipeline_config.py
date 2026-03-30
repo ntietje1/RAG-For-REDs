@@ -15,9 +15,11 @@ QDRANT_URL = "http://localhost:6333"
 # Generation
 GENERATION_MODEL = "google/gemini-3-flash-preview"
 TOP_K = 5
+MAX_PER_SOURCE = 4 # prevents one source from dominating all results after re-ranking
 
 # Re-ranking
 RERANK_CANDIDATE_K = 20  # Retrieve this many candidates before re-ranking
+CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
 # Temporal decay: score *= e^(-lambda * age_in_patches)
 TEMPORAL_LAMBDA = {

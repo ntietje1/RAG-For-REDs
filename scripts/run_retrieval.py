@@ -4,46 +4,36 @@ import argparse
 
 from config.pipeline_config import TOP_K
 from indexing.store import VectorStore
-from retrieval.baseline import BaselineRAG
 from retrieval.enhanced import EnhancedRAG
-
-PIPELINE_MODES = {
-    "baseline":  {"use_temporal": False, "use_authority": False},
-    "temporal":  {"use_temporal": True,  "use_authority": False},
-    "authority": {"use_temporal": False, "use_authority": True},
-    "full":      {"use_temporal": True,  "use_authority": True},
-}
 
 
 def _print_result(result: dict) -> None:
-    classification = result.get("classification")
-    if classification:
-        print(f"\nTemporal scope: {classification['temporal_scope']}")
-        print(f"Authority weights: {classification['authority_weights']}")
-        alt = classification.get("alternate_queries", [])
-        if alt:
-            print(f"Alternate queries: {alt}")
+    cl = result.get("classification") or {}
+    header_parts = []
+    if "temporal_scope" in cl:
+        header_parts.append(f"Temporal scope: {cl['temporal_scope']}")
+    if "authority_weights" in cl:
+        header_parts.append(f"Authority weights: {cl['authority_weights']}")
+    if "alternate_queries" in cl:
+        header_parts.append(f"Alternate queries: {cl['alternate_queries']}")
+    if header_parts:
+        print()
+        print("\n".join(header_parts))
 
     print(f"\nAnswer:\n{result['answer']}\n")
     print("Sources:")
     for i, src in enumerate(result["sources"], 1):
         score = src.get("score", 0.0)
         adj = src.get("adjusted_score")
-        score_str = f"cosine: {score:.3f}"
-        if adj is not None:
-            score_str += f", adjusted: {adj:.3f}"
+        score_str = f"cosine={score:.3f}"
+        if adj is not None and adj != score:
+            score_str += f"  adjusted={adj:.3f}"
         print(f"  [{i}] {src.get('source', '')} — {src.get('url', '')} ({score_str})")
     print()
 
 
 def main():
     parser = argparse.ArgumentParser(description="Query the RAG pipeline")
-    parser.add_argument(
-        "--pipeline",
-        choices=list(PIPELINE_MODES),
-        required=True,
-        help="Which retrieval pipeline to use",
-    )
     parser.add_argument(
         "--query",
         type=str,
@@ -56,6 +46,21 @@ def main():
         help=f"Number of chunks to retrieve (default: {TOP_K})",
     )
     parser.add_argument(
+        "--temporal",
+        action="store_true",
+        help="Enable temporal decay (down-weight older patches)",
+    )
+    parser.add_argument(
+        "--authority",
+        action="store_true",
+        help="Enable source-authority weighting",
+    )
+    parser.add_argument(
+        "--cross-encoder",
+        action="store_true",
+        help="Enable cross-encoder re-ranking",
+    )
+    parser.add_argument(
         "--no-expansion",
         action="store_true",
         help="Disable query expansion (alternate phrasings)",
@@ -63,20 +68,15 @@ def main():
     args = parser.parse_args()
 
     store = VectorStore()
-    mode = PIPELINE_MODES[args.pipeline]
 
-    use_expansion = (not args.no_expansion)
-
-    if args.pipeline == "baseline":
-        pipeline = BaselineRAG(store=store, top_k=args.top_k)
-    else:
-        pipeline = EnhancedRAG(
-            store=store,
-            use_temporal=mode["use_temporal"],
-            use_authority=mode["use_authority"],
-            use_expansion=use_expansion,
-            final_k=args.top_k,
-        )
+    pipeline = EnhancedRAG(
+        store=store,
+        use_temporal=args.temporal,
+        use_authority=args.authority,
+        use_cross_encoder=args.cross_encoder,
+        use_expansion=not args.no_expansion,
+        final_k=args.top_k,
+    )
 
     if args.query:
         _print_result(pipeline.query(args.query))

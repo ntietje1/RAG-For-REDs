@@ -1,11 +1,10 @@
-"""Enhanced RAG pipeline with temporal scope classification and source authority re-ranking."""
+"""RAG pipeline with optional temporal decay, source authority, and cross-encoder re-ranking."""
 
 import logging
 
 from config.pipeline_config import RERANK_CANDIDATE_K, TOP_K
 from indexing.embedder import embed_query
 from indexing.store import VectorStore
-from retrieval.classifier import classify_query
 from retrieval.generator import generate_answer
 from retrieval.reranker import build_patch_index, rerank
 
@@ -13,13 +12,18 @@ logger = logging.getLogger(__name__)
 
 
 class EnhancedRAG:
-    """RAG pipeline with optional temporal decay and/or authority re-ranking."""
+    """RAG pipeline with optional query expansion, temporal, authority, and cross-encoder features.
+
+    When none of the classifier-dependent features (temporal, authority,
+    expansion) are enabled, the LLM classifier call is skipped entirely.
+    """
 
     def __init__(
         self,
         store: VectorStore,
-        use_temporal: bool = True,
-        use_authority: bool = True,
+        use_temporal: bool = False,
+        use_authority: bool = False,
+        use_cross_encoder: bool = False,
         use_expansion: bool = True,
         candidate_k: int = RERANK_CANDIDATE_K,
         final_k: int = TOP_K,
@@ -27,6 +31,7 @@ class EnhancedRAG:
         self.store = store
         self.use_temporal = use_temporal
         self.use_authority = use_authority
+        self.use_cross_encoder = use_cross_encoder
         self.use_expansion = use_expansion
         self.candidate_k = candidate_k
         self.final_k = final_k
@@ -37,9 +42,15 @@ class EnhancedRAG:
         logger.info("Resolved current patch: %s", self.current_patch)
 
     def query(self, question: str) -> dict:
-        """Run the enhanced RAG pipeline and return answer, sources, and classification."""
-        classification = classify_query(question, self.current_patch)
-        logger.info("Classification: %s", classification)
+        """Run the RAG pipeline and return answer, sources, and classification."""
+        # only call the LLM classifier when at least one feature needs it
+        if (self.use_temporal or self.use_authority or self.use_expansion):
+            from retrieval.classifier import classify_query
+
+            classification = classify_query(question, self.current_patch)
+            logger.info("Classification: %s", classification)
+        else:
+            classification = {}
 
         # embed the original query + alternate phrasings, retrieve for each and merge
         alt = classification.get("alternate_queries", []) if self.use_expansion else []
@@ -57,8 +68,10 @@ class EnhancedRAG:
             candidates=candidates,
             patch_index=self.patch_index,
             current_patch=self.current_patch,
-            temporal_scope=classification["temporal_scope"] if self.use_temporal else None,
-            authority_weights=classification["authority_weights"] if self.use_authority else None,
+            temporal_scope=classification.get("temporal_scope") if self.use_temporal else None,
+            authority_weights=classification.get("authority_weights") if self.use_authority else None,
+            query=question,
+            use_cross_encoder=self.use_cross_encoder,
             final_k=self.final_k,
         )
 
@@ -75,12 +88,9 @@ class EnhancedRAG:
             for r in results
         ]
 
-        if not self.use_expansion:
-            classification.pop("alternate_queries", None)
-
         return {
             "answer": answer,
             "sources": sources,
             "retrieved_chunks": results,
-            "classification": classification,
+            "classification": classification or None,
         }
