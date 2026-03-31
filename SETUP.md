@@ -100,20 +100,32 @@ python scripts/run_indexing.py --rebuild
 **Single query:**
 
 ```bash
-python scripts/run_retrieval.py --pipeline baseline --query "What changed for Zeri in patch 25.23?"
+# Baseline with query expansion 
+python scripts/run_retrieval.py --query "What changed for Zeri in patch 25.23?"
+
+# Add enhancements
+python scripts/run_retrieval.py --cross-encoder --query "..."
+python scripts/run_retrieval.py --temporal --cross-encoder --query "..."
+python scripts/run_retrieval.py --temporal --authority --cross-encoder --query "..."
+
+# Pure baseline — no classifier, no enhancements
+python scripts/run_retrieval.py --no-expansion --query "..."
 ```
 
 **Interactive mode** (omit `--query`):
 
 ```bash
-python scripts/run_retrieval.py --pipeline baseline
+python scripts/run_retrieval.py
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--pipeline` | *(required)* | `baseline` (temporal pipeline not yet implemented) |
 | `--query` | — | Single question; omit for interactive REPL |
 | `--top-k` | `5` | Number of chunks to retrieve |
+| `--temporal` | off | Enable temporal decay (down-weight older patches) |
+| `--authority` | off | Enable source-authority weighting |
+| `--cross-encoder` | off | Enable cross-encoder re-ranking |
+| `--no-expansion` | off | Disable query expansion (alternate phrasings) |
 
 ---
 
@@ -123,5 +135,5 @@ python scripts/run_retrieval.py --pipeline baseline
 docker compose up -d && \
 python scripts/run_processing.py --raw-dir data && \
 python scripts/run_indexing.py --rebuild && \
-python scripts/run_retrieval.py --pipeline baseline
+python scripts/run_retrieval.py --cross-encoder
 ```

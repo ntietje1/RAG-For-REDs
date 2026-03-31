@@ -3,32 +3,62 @@
 import argparse
 import dataclasses
 import json
+import re
 import sys
 from pathlib import Path
 
 from config.pipeline_config import CHUNK_OVERLAP, CHUNK_SIZE
 from config.settings import DATA_DIR
-from processing.chunker import chunk_fixed_size
-from processing.loader import Document, load_all_sources, load_source
+from processing.chunker import chunk_sentences
+from processing.loader import Document, stream_all_sources, stream_source
 
-# Sources that need fixed-size splitting. Stats (lolalytics) are one short
+
+def _context_prefix(doc: Document) -> str:
+    """Return a short context string to prepend to each chunk, based on source."""
+    if doc.source == "riot_patch_notes":
+        pv = doc.patch_version
+        heading = doc.metadata.get("heading", "")
+        return f"Patch {pv} — {heading}" if pv and heading else heading or ""
+    if doc.source == "wiki":
+        title = doc.metadata.get("title", "")
+        return re.sub(r"<[^>]+>", "", title)
+    if doc.source == "reddit":
+        return doc.metadata.get("title", "")
+    return ""
+
+
+# Sources that need splitting. Stats (lolalytics) are one short
 # sentence per champion and never exceed the chunk limit.
 _SOURCES_NEEDING_CHUNKING = {"riot_patch_notes", "wiki", "reddit"}
 
 
-def _chunk_documents(docs: list[Document]) -> list[Document]:
-    """Apply per-source chunking strategies and assign stable chunk doc_ids."""
-    chunks: list[Document] = []
-    for doc in docs:
-        if doc.source in _SOURCES_NEEDING_CHUNKING:
-            sub = chunk_fixed_size(doc, CHUNK_SIZE, CHUNK_OVERLAP)
-            for i, chunk in enumerate(sub):
-                chunk.doc_id = f"{doc.doc_id}_c{i}"
-            chunks.extend(sub)
-        else:
-            # lolalytics stats: one doc per champion.
-            chunks.append(doc)
-    return chunks
+def _chunk_and_write(docs, output: Path) -> tuple[int, int]:
+    """Stream docs through chunking and write directly to disk.
+
+    Returns (doc_count, chunk_count).
+    """
+    output.parent.mkdir(parents=True, exist_ok=True)
+    doc_count = 0
+    chunk_count = 0
+
+    with output.open("w", encoding="utf-8") as f:
+        for doc in docs:
+            doc_count += 1
+            if doc_count % 500 == 0:
+                print(f"processed {doc_count} documents")
+
+            if doc.source in _SOURCES_NEEDING_CHUNKING:
+                prefix = _context_prefix(doc)
+                sub = chunk_sentences(doc, CHUNK_SIZE, CHUNK_OVERLAP, prefix)
+                for i, chunk in enumerate(sub):
+                    chunk.doc_id = f"{doc.doc_id}_c{i}"
+                    f.write(json.dumps(dataclasses.asdict(chunk)) + "\n")
+                chunk_count += len(sub)
+            else:
+                f.write(json.dumps(dataclasses.asdict(doc)) + "\n")
+                chunk_count += 1
+
+    return doc_count, chunk_count
 
 
 def main():
@@ -60,22 +90,14 @@ def main():
 
     print(f"Loading source: {args.source}")
     if args.source == "all":
-        docs = load_all_sources(raw_dir)
+        docs = stream_all_sources(raw_dir)
     else:
         source_dir = raw_dir / args.source
-        docs = load_source(source_dir)
+        docs = stream_source(source_dir)
 
-    print(f"Loaded {len(docs)} documents")
-    chunks = _chunk_documents(docs)
-    print(f"Produced {len(chunks)} chunks")
-
-    output: Path = args.output
-    output.parent.mkdir(parents=True, exist_ok=True)
-    with output.open("w", encoding="utf-8") as f:
-        for chunk in chunks:
-            f.write(json.dumps(dataclasses.asdict(chunk)) + "\n")
-
-    print(f"Saved {len(chunks)} chunks → {output}")
+    doc_count, chunk_count = _chunk_and_write(docs, args.output)
+    print(f"Processed {doc_count} documents: {chunk_count} chunks")
+    print(f"Saved: {args.output}")
 
 
 if __name__ == "__main__":

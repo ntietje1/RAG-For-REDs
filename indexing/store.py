@@ -107,6 +107,27 @@ class VectorStore:
             for hit in response.points
         ]
 
+    def get_patch_versions(self) -> set[str]:
+        """Return all distinct patch_version values stored in the collection."""
+        versions: set[str] = set()
+        offset = None
+        while True:
+            points, offset = self._client.scroll(
+                collection_name=_COLLECTION,
+                limit=256,
+                with_payload=["patch_version"],
+                offset=offset,
+            )
+            for p in points:
+                v = p.payload.get("patch_version")
+                if v:
+                    versions.add(v)
+            if offset is None:
+                break
+        if not versions:
+            raise RuntimeError("No patch_version metadata found in collection")
+        return versions
+
     def clear(self) -> None:
         """Delete and recreate the collection, removing all documents."""
         self._client.delete_collection(_COLLECTION)

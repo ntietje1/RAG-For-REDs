@@ -1,0 +1,402 @@
+[
+  {
+    "id": "EO-1",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "What is the primary objective to win a match in League of Legends?",
+    "expected_answer": "The enemy Nexus",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=The%20Nexus%20is%20the%20heart%20of%20both%20teams%E2%80%99%20bases.%20Destroy%20the%20enemy%E2%80%99s%20Nexus%20first%20to%20win%20the%20game.",
+    "extra_link": null
+  },
+  {
+    "id": "EO-2",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "How many primary lanes are there on the Summoner's Rift map?",
+    "expected_answer": "Three (top, mid, and bot)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=There%20are%20five%20positions,SUPPORT",
+    "extra_link": null
+  },
+  {
+    "id": "EO-3",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "How many players are on each starting team in a standard Summoner's Rift match?",
+    "expected_answer": "Five players per team",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=teams%20of%20five%20powerful%20champions",
+    "extra_link": null
+  },
+  {
+    "id": "EO-4",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "How many core abilities does a standard champion have?",
+    "expected_answer": "Five (1 passive, 3 basics, 1 ultimate)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=Most%20champions%20have%20a%20unique%20kit%20made%20up%20of%20five%20abilities%3A%20a%20Passive%2C%20three%20Basics%2C%20and%20an%20Ultimate.%20These%20abilities%20are%20mapped%20to%20the%20Q%2C%20W%2C%20E%2C%20and%20R%20keys.",
+    "extra_link": null
+  },
+  {
+    "id": "EO-5",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "What are the two primary ways champions get stronger during a match?",
+    "expected_answer": "Earning experience (to level up) and gold (to buy items)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=Champions%20get%20stronger%20by%20earning%20experience%20to%20level%20up%20and%20gold",
+    "extra_link": null
+  },
+  {
+    "id": "EO-6",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "What are the five standard positions/roles in a team composition?",
+    "expected_answer": "Top, jungle, mid, bot (adc), and support",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=There%20are%20five%20positions,SUPPORT",
+    "extra_link": null
+  },
+  {
+    "id": "EO-7",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "What is the purpose of the Nexus in each team's base?",
+    "expected_answer": "It is the heart of the base; it spawns minions and its destruction ends the game.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=Your%20Nexus%20is%20where%20minions%20spawn.%20Behind%20your%20Nexus%20is%20the%20Fountain%2C%20where%20you%20can%20quickly%20replenish%20health%20and%20mana%20and%20access%20the%20Shop.",
+    "extra_link": null
+  },
+  {
+    "id": "EO-8",
+    "temporality": "Evergreen",
+    "source": "Official",
+    "category": "Evergreen-Official",
+    "question": "What is the default keybinding for a champion's Ultimate ability?",
+    "expected_answer": "The R key",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/how-to-play/#:~:text=Most%20champions%20have%20a%20unique%20kit%20made%20up%20of%20five%20abilities%3A%20a%20Passive%2C%20three%20Basics%2C%20and%20an%20Ultimate.%20These%20abilities%20are%20mapped%20to%20the%20Q%2C%20W%2C%20E%2C%20and%20R%20keys.",
+    "extra_link": null
+  },
+  {
+    "id": "EC-1",
+    "temporality": "Evergreen",
+    "source": "Community",
+    "category": "Evergreen-Community",
+    "question": "What does \"gank\" mean?",
+    "expected_answer": "To ambush unsuspecting enemies",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Terminology_(League_of_Legends)#:~:text=Gangplank-,Gank,-To%20ambush%20unsuspecting",
+    "extra_link": null
+  },
+  {
+    "id": "EC-2",
+    "temporality": "Evergreen",
+    "source": "Community",
+    "category": "Evergreen-Community",
+    "question": "Why last-hit?",
+    "expected_answer": "Champions can earn significantly more gold by last-hitting.",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Farming#:~:text=champions%20can%20earn%20significantly%20more%20income%20by%20last%2Dhitting",
+    "extra_link": null
+  },
+  {
+    "id": "EC-3",
+    "temporality": "Evergreen",
+    "source": "Community",
+    "category": "Evergreen-Community",
+    "question": "What is \"peeling\"?",
+    "expected_answer": "To proactively or reactively protect the carries for any amount of time during combat",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Peeling#:~:text=Peeling%20(or%20peel%20for%20short)%20describes%20the%20act%20of%20proactively%20or%20reactively%20protecting%20an%20ally%20for%20any%20amount%20of%20time%20during%20combat.",
+    "extra_link": null
+  },
+  {
+    "id": "EC-4",
+    "temporality": "Evergreen",
+    "source": "Community",
+    "category": "Evergreen-Community",
+    "question": "What's a \"face check\"?",
+    "expected_answer": "Walking into a bush without vision; risky as it often leads to being ambushed.",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Terminology_(League_of_Legends)#:~:text=Face%20check,very%20risky%20action.",
+    "extra_link": null
+  },
+  {
+    "id": "EC-5",
+    "temporality": "Evergreen",
+    "source": "Community",
+    "category": "Evergreen-Community",
+    "question": "What does CC mean?",
+    "expected_answer": "Crowd control: status effects which limit movement or actions.",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Terminology_(League_of_Legends)#:~:text=CC,movement%20or%20actions.",
+    "extra_link": null
+  },
+  {
+    "id": "EC-6",
+    "temporality": "Evergreen",
+    "source": "Community",
+    "category": "Evergreen-Community",
+    "question": "What does it mean to kite an enemy?",
+    "expected_answer": "Attacking a pursuing target while maintaining safe distance",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Terminology_(League_of_Legends)#:~:text=Kiting,a%20pursuing%20target.",
+    "extra_link": null
+  },
+  {
+    "id": "EX-1",
+    "temporality": "Evergreen",
+    "source": "Cross-sourced",
+    "category": "Evergreen-Cross-sourced",
+    "question": "Is \"Smurfing\" bad?",
+    "expected_answer": "Riot: Discouraged and result in penalties when Riot detects; Reddit: Viewed as a matchmaking killer",
+    "ground_truth_link": "https://www.riotgames.com/en/community-pact#section-0:~:text=result%20in%20penalties%20when%20we%20detect%20these%20behaviors.%20That%20includes%20boosting%2C%20queue%20boosting%2C%20and%20smurfing",
+    "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/168frho/why_isnt_riot_banning_smurfs_like_valve_for_dota/"
+  },
+  {
+    "id": "EX-2",
+    "temporality": "Evergreen",
+    "source": "Cross-sourced",
+    "category": "Evergreen-Cross-sourced",
+    "question": "Is it okay to pick off-meta champions?",
+    "expected_answer": "Riot: Allowed as long as you're trying to win; Reddit: Some players may consider as trolling",
+    "ground_truth_link": "https://support-leagueoflegends.riotgames.com/hc/en-us/articles/201752884-Player-Reporting-Guide-and-FAQ#:~:text=Choosing%20unusual%20champions%2C%20building%20unusual%20items%2C%20or%20experimenting%20with%20new%20ideas%20that%20don%E2%80%99t%20match%20the%20current%20%E2%80%9Cmeta%E2%80%9D",
+    "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/urdrs0/are_off_meta_picks_trolling/"
+  },
+  {
+    "id": "EX-3",
+    "temporality": "Evergreen",
+    "source": "Cross-sourced",
+    "category": "Evergreen-Cross-sourced",
+    "question": "Is soft inting a bannable behavior?",
+    "expected_answer": "Riot: Yes; Reddit: Difficult to prove",
+    "ground_truth_link": "https://support-leagueoflegends.riotgames.com/hc/en-us/articles/201752884-Player-Reporting-Guide-and-FAQ#:~:text=Intentionally%20ruining%20the%20game%20for%20other%20players%20with%20in%2Dgame%20actions%20such%20as%20griefing%2C%20feeding%2C%20or%20purposely%20playing%20in%20a%20way%20to%20make%20it%20harder%20for%20the%20rest%20of%20the%20team.",
+    "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/1qnpn8d/riots_int_detection_system_is_super_dissapointing/"
+  },
+  {
+    "id": "VO-1",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is the cooldown of Lissandra's Q at max rank?",
+    "expected_answer": "3 seconds (reduced from 4s)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=Q%20%2D%20Ice%20Shard,5%20/%204%20/%203",
+    "extra_link": null
+  },
+  {
+    "id": "VO-2",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is the build path for Sunfire Aegis?",
+    "expected_answer": "Bami's Cinder + Chain Vest + Ruby Crystal + 600 gold",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=Build%20Path%3A%20Bami%27s%20Cinder%20%2B%20Chain%20Vest%20%2B%201000%20gold%20%E2%87%92%20Bami%27s%20Cinder%20%2B%20Chain%20Vest%20%2B%20Ruby%20Crystal%20%2B%20600%20gold",
+    "extra_link": null
+  },
+  {
+    "id": "VO-3",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is the Support gold penalty threshold before 5 minutes?",
+    "expected_answer": "24 minions (increased from 7)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=Minion%20Kills%20Before%20Gold%20Penalty%20Activates%20(Before%205%20Minutes)%3A%207%20%E2%87%92%2024",
+    "extra_link": null
+  },
+  {
+    "id": "VO-4",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is the mana cost of Volibear's E?",
+    "expected_answer": "50 (decreased from 60)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-5-notes/#:~:text=E%20%2D%20Sky%20Splitter,%3A%2060%20%E2%87%92%2050",
+    "extra_link": null
+  },
+  {
+    "id": "VO-5",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is the damage of Annie's Q at max rank?",
+    "expected_answer": "260 (increased from 240)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-4-notes/#:~:text=Q%20%2D%20Disintegrate,170%20/%20215%20/%20260",
+    "extra_link": null
+  },
+  {
+    "id": "VO-6",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is the total gold cost needed to purchase an Actualizer?",
+    "expected_answer": "2800 gold (decreased from 3100 gold)",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-3-notes/#:~:text=Total%20Gold%20Cost%3A%203100%20Gold%20%E2%87%92%202800%20Gold",
+    "extra_link": null
+  },
+  {
+    "id": "VO-7",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What change was made to Shen's Q regarding the jungle?",
+    "expected_answer": "Damage to monster camps was reduced to slow his clear",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=reduce%20his%20clear,150%20/%20175%20/%20200",
+    "extra_link": null
+  },
+  {
+    "id": "VO-8",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What is Aegis of Valor?",
+    "expected_answer": "A new 2026 system that protects autofilled players from LP loss if they earn a C grade or higher.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=If%20you%20are%20autofilled%20and%20get%20mastery%20C%20or%20above%20rating%2C%20you%20will%20have%20no%20LP%20deduction%20on%20a%20loss%2C%20or%20you%27ll%20gain%20double%20LP%20gain%20for%20a%20win.",
+    "extra_link": null
+  },
+  {
+    "id": "VC-1",
+    "temporality": "Version-sensitive",
+    "source": "Community",
+    "category": "Version-sensitive-Community",
+    "question": "Which support champions are given an S+ tier in Ranked mode?",
+    "expected_answer": "Nami, Thresh",
+    "ground_truth_link": "https://lolalytics.com/lol/tierlist/?lane=support",
+    "extra_link": null
+  },
+  {
+    "id": "VC-2",
+    "temporality": "Version-sensitive",
+    "source": "Community",
+    "category": "Version-sensitive-Community",
+    "question": "How did the community react to the Shyvana rework?",
+    "expected_answer": "Mixed to Negative; mains feel she has \"less agency\" and a \"useless\" W shield.",
+    "ground_truth_link": "https://www.reddit.com/r/shyvanamains/comments/1rzapyr/the_reaction_to_shyvana_rework_is_the_reason_riot/",
+    "extra_link": null
+  },
+  {
+    "id": "VX-1",
+    "temporality": "Version-sensitive",
+    "source": "Cross-sourced",
+    "category": "Version-sensitive-Cross-sourced",
+    "question": "Is the latest change to Lissandra supposed to be a buff?",
+    "expected_answer": "Riot: Yes. Riot intended to restore her \"old glory\"; Community: Debatable. Mains argue the Armor nerf (4.9 -> 4.2) makes her too squishy.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=We%20think%20this%20is%20going%20to%20be%20a%20big%20power%2Dup",
+    "extra_link": "https://www.reddit.com/r/LissandraMains/comments/1rpqffj/everyone_stay_calm_this_is_not_a_drill/"
+  },
+  {
+    "id": "VX-2",
+    "temporality": "Version-sensitive",
+    "source": "Cross-sourced",
+    "category": "Version-sensitive-Cross-sourced",
+    "question": "Is Shen Jungle nerfed?",
+    "expected_answer": "Riot: Yes; Community: No, still pretty strong as a jungler",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=outperforming%20many%20other%20junglers%20with%20one%20of%20the%20best%20clear%20speeds%20in%20the%20game%2C%20reliable%20ganks%2C%20and%20a%20global%20presence%20starting%20at%20level%206.%20Given%20the%20latter%20two%20strengths%2C%20we%20think%20it%27s%20fair%20to%20reduce%20his%20clear%20speed",
+    "extra_link": "https://www.reddit.com/r/Shen/comments/1rrs15g/some_math_of_shen_after_the_nerfs/"
+  },
+  {
+    "id": "VX-3",
+    "temporality": "Version-sensitive",
+    "source": "Cross-sourced",
+    "category": "Version-sensitive-Cross-sourced",
+    "question": "Is Shyvana's W shield considered useful?",
+    "expected_answer": "Riot: Adds durability; Community: Mains claim it's \"useless\"",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-ph/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=AP)%20true%20damage.-,W%20%2D%20Inferno%20Aegis,-Cooldown%3A%2012%20seconds",
+    "extra_link": "https://www.reddit.com/r/shyvanamains/comments/1rkfi8i/lets_be_real_the_shyvana_rework_is_a_mess/"
+  },
+  {
+    "id": "MO-1",
+    "temporality": "Mixed",
+    "source": "Official",
+    "category": "Mixed-Official",
+    "question": "As of the 2026 Season, at what time does Baron Nashor spawn, and how does this compare to the previous year?",
+    "expected_answer": "It returned to its 20-minute spawn (from 25 minutes) due to the removal of Atakhan.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=Spawn%20timer%3A%2025m%20%E2%87%92%2020m",
+    "extra_link": null
+  },
+  {
+    "id": "MO-2",
+    "temporality": "Mixed",
+    "source": "Official",
+    "category": "Mixed-Official",
+    "question": "Has the Level Cap changed in Season 2026?",
+    "expected_answer": "The cap is still 18 for other roles, but Top Laners who finish their quest can reach Level 20.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=Level%20cap%20increased%20to%2020",
+    "extra_link": null
+  },
+  {
+    "id": "MO-3",
+    "temporality": "Mixed",
+    "source": "Official",
+    "category": "Mixed-Official",
+    "question": "What happened to Turret Plates in 2026?",
+    "expected_answer": "They still grant gold, but T1 plates no longer fall off at 14:00; Plate value reduces by 10g per minute at minute 11, capped at -40",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=Plates%20are%20now%20permanent%20instead,minute%2011%2C%20capped%20at%20%2D40",
+    "extra_link": null
+  },
+  {
+    "id": "MO-4",
+    "temporality": "Mixed",
+    "source": "Official",
+    "category": "Mixed-Official",
+    "question": "What is the Teleport reward for Top Quest, if you didn't take Teleport as a Summoner spell?",
+    "expected_answer": "Unleashed Teleport for free upon completion.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=If%20the%20top%20laner%20did%20not%20select%20Teleport%20as%20a%20Summoner%20Spell%2C%20gain%20Unleashed%20Teleport%20on%20a%207%20minute%20cooldown.",
+    "extra_link": null
+  },
+  {
+    "id": "MO-5",
+    "temporality": "Mixed",
+    "source": "Official",
+    "category": "Mixed-Official",
+    "question": "What happens to Nexus Turret HP upon respawn?",
+    "expected_answer": "They respawn with only 40% HP.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=Nexus%20turret%20HP%20on%20respawn%3A%20100%25%20%E2%87%92%2040%25",
+    "extra_link": null
+  },
+  {
+    "id": "MC-1",
+    "temporality": "Mixed",
+    "source": "Community",
+    "category": "Mixed-Community",
+    "question": "How do Fiddlesticks mains view the Faelight vision changes?",
+    "expected_answer": "As a massive nerf; the 45s reveal area makes it nearly impossible to set up \"Fear\" ultimates from over walls.",
+    "ground_truth_link": "https://www.reddit.com/r/leagueoflegends/comments/1pfwhuz/new_faelight_changes_will_completely_gut/",
+    "extra_link": null
+  },
+  {
+    "id": "MC-2",
+    "temporality": "Mixed",
+    "source": "Community",
+    "category": "Mixed-Community",
+    "question": "Is invading still a sound Level 1 strategy in 2026?",
+    "expected_answer": "Yes, but riskier with the new minion spawn start time change.",
+    "ground_truth_link": "https://www.reddit.com/r/leagueoflegends/comments/1qd2b2x/is_early_invading_worthless_now/",
+    "extra_link": null
+  },
+  {
+    "id": "MC-3",
+    "temporality": "Mixed",
+    "source": "Community",
+    "category": "Mixed-Community",
+    "question": "Why is the Faelight system criticized by Junglers?",
+    "expected_answer": "They find it makes ganking a gamble because vision can't be easily denied.",
+    "ground_truth_link": "https://www.reddit.com/r/Jungle_Mains/comments/1q7iqx9/i_hate_how_you_can_walk_over_vision_with_no_way/",
+    "extra_link": null
+  },
+  {
+    "id": "MX-1",
+    "temporality": "Mixed",
+    "source": "Cross-sourced",
+    "category": "Mixed-Cross-sourced",
+    "question": "Does Aegis of Valor prevent \"Soft Inting\"?",
+    "expected_answer": "Riot: Yes. Rewards effort in autofill roles with LP protection to reduce tilt; Community: Mixed. Players argue it may encourage \"KDA farming\" for a C grade rather than trying to win.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=In%20order%20to%20make%20sure%20autofilled%20players%20are%20trying%20their%20best",
+    "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/1qukzpa/grade_requirements_for_aegis_of_valor_are/"
+  },
+  {
+    "id": "MX-2",
+    "temporality": "Mixed",
+    "source": "Cross-sourced",
+    "category": "Mixed-Cross-sourced",
+    "question": "Is the 0:30 Minion Spawn a good change?",
+    "expected_answer": "Riot: Speeds up the \"dead time\" at the start of the match; Community: Mixed. It stops AFK deaths (Pro) but kills deep-warding strategies (Con).",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=accelerate%20the%20game%2C%20aiming%20at%20a%20much%20higher%20action%2C%20shorter%20game%20loop",
+    "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/1q8vxqt/the_faster_minion_spawn_is_honestly_one_of_the/"
+  }
+]
