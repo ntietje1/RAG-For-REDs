@@ -100,13 +100,16 @@ python scripts/run_indexing.py --rebuild
 **Single query:**
 
 ```bash
-# Baseline with query expansion 
+# Baseline with query expansion
 python scripts/run_retrieval.py --query "What changed for Zeri in patch 25.23?"
 
 # Add enhancements
 python scripts/run_retrieval.py --cross-encoder --query "..."
 python scripts/run_retrieval.py --temporal --cross-encoder --query "..."
 python scripts/run_retrieval.py --temporal --authority --cross-encoder --query "..."
+
+# Use discrete authority levels instead of continuous floats
+python scripts/run_retrieval.py --temporal --authority --discrete-weights --query "..."
 
 # Pure baseline — no classifier, no enhancements
 python scripts/run_retrieval.py --no-expansion --query "..."
@@ -126,6 +129,42 @@ python scripts/run_retrieval.py
 | `--authority` | off | Enable source-authority weighting |
 | `--cross-encoder` | off | Enable cross-encoder re-ranking |
 | `--no-expansion` | off | Disable query expansion (alternate phrasings) |
+| `--discrete-weights` | off | Use discrete authority levels (`low`/`medium`/`high`) instead of continuous floats |
+
+The classifier now outputs additional fields alongside temporal scope and authority weights:
+- **reasoning** — chain-of-thought rationale explaining the classification
+- **target_patch** — the specific patch version referenced by the query (if any), used as the reference point for temporal decay instead of the latest patch
+
+---
+
+## Step 5 — Run the evaluation
+
+Runs all 30 evaluation questions through 4 ablation configurations (baseline, temporal-only, authority-only, full) and scores each with an LLM-as-judge (GPT-4o-mini) on four metrics: faithfulness, answer relevancy, context precision, and context recall.
+
+```bash
+# Full evaluation (all configs, all questions)
+python -m evaluation.evaluate
+
+# Quick smoke test (1 question per config)
+python -m evaluation.evaluate --dry-run
+
+# Evaluate a subset of configs
+python -m evaluation.evaluate --configs baseline full
+
+# Custom paths
+python -m evaluation.evaluate --questions evaluation/questions.json --output evaluation/results.json
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--questions` | `evaluation/questions.json` | Path to evaluation questions JSON |
+| `--output` | `evaluation/results.json` | Path to write raw per-question results |
+| `--configs` | all | Subset of configs to run: `baseline`, `temporal_only`, `authority_only`, `full` |
+| `--dry-run` | off | Run only 1 question per config to verify the pipeline works end-to-end |
+
+Results are printed as a comparison table broken down by temporality category (Evergreen, Version-sensitive, Mixed) and saved as JSON for further analysis.
+
+> **Cost note:** a full run makes ~690 API calls (4 configs x 30 questions x ~6 LLM calls each). At Gemini Flash + GPT-4o-mini rates this costs a few cents and takes ~15-20 minutes.
 
 ---
 
