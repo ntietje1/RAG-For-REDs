@@ -27,3 +27,9 @@ TEMPORAL_LAMBDA = {
     "mixed": 0.25,
     "version-sensitive": 0.5,
 }
+
+# Discrete authority levels (used when discrete_weights mode is enabled)
+AUTHORITY_LEVELS = {"low": 0.2, "medium": 0.5, "high": 1.0}
+
+# Evaluation
+EVAL_MODEL = "openai/gpt-4o-mini"
