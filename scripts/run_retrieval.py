@@ -14,8 +14,12 @@ def _print_result(result: dict) -> None:
         header_parts.append(f"Temporal scope: {cl['temporal_scope']}")
     if "authority_weights" in cl:
         header_parts.append(f"Authority weights: {cl['authority_weights']}")
+    if "target_patch" in cl and cl["target_patch"]:
+        header_parts.append(f"Target patch: {cl['target_patch']}")
     if "alternate_queries" in cl:
         header_parts.append(f"Alternate queries: {cl['alternate_queries']}")
+    if "reasoning" in cl and cl["reasoning"]:
+        header_parts.append(f"Reasoning: {cl['reasoning']}")
     if header_parts:
         print()
         print("\n".join(header_parts))
@@ -65,6 +69,11 @@ def main():
         action="store_true",
         help="Disable query expansion (alternate phrasings)",
     )
+    parser.add_argument(
+        "--discrete-weights",
+        action="store_true",
+        help="Use discrete authority levels (low/medium/high) instead of continuous floats",
+    )
     args = parser.parse_args()
 
     store = VectorStore()
@@ -75,6 +84,7 @@ def main():
         use_authority=args.authority,
         use_cross_encoder=args.cross_encoder,
         use_expansion=not args.no_expansion,
+        discrete_weights=args.discrete_weights,
         final_k=args.top_k,
     )
 
