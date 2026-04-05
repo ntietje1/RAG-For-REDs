@@ -31,6 +31,7 @@ def rerank(
     patch_index: dict[str, int],
     current_patch: str,
     temporal_scope: str | None = None,
+    target_patch: str | None = None,
     authority_weights: dict[str, float] | None = None,
     query: str | None = None,
     use_cross_encoder: bool = False,
@@ -43,6 +44,8 @@ def rerank(
     is supplied:
       - use_cross_encoder + query: replace cosine with cross-encoder scores
       - temporal_scope: apply exponential decay based on patch age
+      - target_patch: use this patch as the decay reference point instead of
+        current_patch (for historical patch queries)
       - authority_weights: multiply by per-source weight
     """
     if use_cross_encoder and query is not None:
@@ -54,15 +57,23 @@ def rerank(
         ce_scores = None
 
     lam = TEMPORAL_LAMBDA.get(temporal_scope, 0.0) if temporal_scope else 0.0
-    current_idx = patch_index.get(current_patch, 0)
+
+    # Determine the reference point for temporal decay.  When the query targets
+    # a specific historical patch, decay relative to that patch so chunks from
+    # that patch are NOT penalised.  Otherwise decay from the current patch.
+    if target_patch and target_patch in patch_index:
+        reference_idx = patch_index[target_patch]
+    else:
+        reference_idx = patch_index.get(current_patch, 0)
 
     scored = []
     for i, chunk in enumerate(candidates):
         score = ce_scores[i] if ce_scores is not None else chunk.get("score", 0.0)
 
         if lam > 0.0 and chunk.get("patch_version"):
-            age = current_idx - patch_index.get(chunk["patch_version"], current_idx)
-            score *= math.exp(-lam * max(0, age))
+            chunk_idx = patch_index.get(chunk["patch_version"], reference_idx)
+            age = abs(reference_idx - chunk_idx)
+            score *= math.exp(-lam * age)
 
         if authority_weights:
             score *= authority_weights.get(chunk.get("source", ""), 0.5)

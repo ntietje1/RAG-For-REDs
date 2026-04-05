@@ -25,6 +25,7 @@ class EnhancedRAG:
         use_authority: bool = False,
         use_cross_encoder: bool = False,
         use_expansion: bool = True,
+        discrete_weights: bool = False,
         candidate_k: int = RERANK_CANDIDATE_K,
         final_k: int = TOP_K,
     ):
@@ -33,6 +34,7 @@ class EnhancedRAG:
         self.use_authority = use_authority
         self.use_cross_encoder = use_cross_encoder
         self.use_expansion = use_expansion
+        self.discrete_weights = discrete_weights
         self.candidate_k = candidate_k
         self.final_k = final_k
 
@@ -47,10 +49,14 @@ class EnhancedRAG:
         if (self.use_temporal or self.use_authority or self.use_expansion):
             from retrieval.classifier import classify_query
 
-            classification = classify_query(question, self.current_patch)
+            classification = classify_query(
+                question, self.current_patch, discrete_weights=self.discrete_weights
+            )
             logger.info("Classification: %s", classification)
         else:
             classification = {}
+
+        target_patch = classification.get("target_patch") if self.use_temporal else None
 
         # embed the original query + alternate phrasings, retrieve for each and merge
         alt = classification.get("alternate_queries", []) if self.use_expansion else []
@@ -69,6 +75,7 @@ class EnhancedRAG:
             patch_index=self.patch_index,
             current_patch=self.current_patch,
             temporal_scope=classification.get("temporal_scope") if self.use_temporal else None,
+            target_patch=target_patch,
             authority_weights=classification.get("authority_weights") if self.use_authority else None,
             query=question,
             use_cross_encoder=self.use_cross_encoder,
