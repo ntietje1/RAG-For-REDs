@@ -2,41 +2,17 @@
 
 import json
 import logging
-import os
 
-from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
-from config.pipeline_config import AUTHORITY_LEVELS, GENERATION_MODEL
-
-load_dotenv()
+from config.client import get_generation_llm
+from config.pipeline_config import AUTHORITY_LEVELS
 
 logger = logging.getLogger(__name__)
-
-_BASE_URL = "https://openrouter.ai/api/v1"
 
 _VALID_SCOPES = {"evergreen", "version-sensitive", "mixed"}
 _VALID_SOURCES = {"riot_patch_notes", "lolalytics", "wiki", "reddit"}
 _AUTHORITY_LEVEL_MAP = AUTHORITY_LEVELS  # {"low": 0.2, "medium": 0.5, "high": 1.0}
-
-_classifier_llm: ChatOpenAI | None = None
-
-
-def _get_classifier_llm() -> ChatOpenAI:
-    """Return the shared LangChain ChatOpenAI instance for classification."""
-    global _classifier_llm
-    if _classifier_llm is None:
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise EnvironmentError("OPENROUTER_API_KEY is not set")
-        _classifier_llm = ChatOpenAI(
-            model=GENERATION_MODEL,
-            openai_api_key=api_key,
-            openai_api_base=_BASE_URL,
-            temperature=0.0,
-        )
-    return _classifier_llm
 
 
 # ---------------------------------------------------------------------------
@@ -295,8 +271,7 @@ def classify_query(
         messages.append(AIMessage(content=json.dumps(response)))
     messages.append(HumanMessage(content=query))
 
-    llm = _get_classifier_llm()
-    result = llm.invoke(messages)
+    result = get_generation_llm().invoke(messages)
     content = result.content.strip()
 
     try:

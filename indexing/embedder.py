@@ -1,32 +1,6 @@
-"""Embedding generation via LangChain OpenAI embeddings (OpenRouter-compatible)."""
+"""Embedding generation via shared LangChain OpenAI embeddings."""
 
-import os
-
-from dotenv import load_dotenv
-from langchain_openai import OpenAIEmbeddings
-
-from config.pipeline_config import EMBEDDING_MODEL
-
-load_dotenv()
-
-_BASE_URL = "https://openrouter.ai/api/v1"
-
-_embeddings: OpenAIEmbeddings | None = None
-
-
-def get_embeddings() -> OpenAIEmbeddings:
-    """Return the shared LangChain embeddings instance, initializing on first call."""
-    global _embeddings
-    if _embeddings is None:
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise EnvironmentError("OPENROUTER_API_KEY is not set")
-        _embeddings = OpenAIEmbeddings(
-            model=EMBEDDING_MODEL,
-            openai_api_key=api_key,
-            openai_api_base=_BASE_URL,
-        )
-    return _embeddings
+from config.client import get_embeddings
 
 
 def embed_documents(documents, batch_size: int = 100) -> list[list[float]]:
