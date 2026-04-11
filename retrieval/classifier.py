@@ -1,16 +1,43 @@
-"""LLM-based temporal scope and source authority classifier."""
+"""LLM-based temporal scope and source authority classifier using LangChain."""
 
 import json
 import logging
+import os
 
-from config.client import get_client
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+
 from config.pipeline_config import AUTHORITY_LEVELS, GENERATION_MODEL
 
+load_dotenv()
+
 logger = logging.getLogger(__name__)
+
+_BASE_URL = "https://openrouter.ai/api/v1"
 
 _VALID_SCOPES = {"evergreen", "version-sensitive", "mixed"}
 _VALID_SOURCES = {"riot_patch_notes", "lolalytics", "wiki", "reddit"}
 _AUTHORITY_LEVEL_MAP = AUTHORITY_LEVELS  # {"low": 0.2, "medium": 0.5, "high": 1.0}
+
+_classifier_llm: ChatOpenAI | None = None
+
+
+def _get_classifier_llm() -> ChatOpenAI:
+    """Return the shared LangChain ChatOpenAI instance for classification."""
+    global _classifier_llm
+    if _classifier_llm is None:
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise EnvironmentError("OPENROUTER_API_KEY is not set")
+        _classifier_llm = ChatOpenAI(
+            model=GENERATION_MODEL,
+            openai_api_key=api_key,
+            openai_api_base=_BASE_URL,
+            temperature=0.0,
+        )
+    return _classifier_llm
+
 
 # ---------------------------------------------------------------------------
 # System prompts — shared preamble + mode-specific authority_weights section
@@ -262,19 +289,15 @@ def classify_query(
     system_prompt = template.format(current_patch=current_patch)
     examples = _build_examples(discrete_weights)
 
-    messages = [{"role": "system", "content": system_prompt}]
+    messages = [SystemMessage(content=system_prompt)]
     for q, response in examples:
-        messages.append({"role": "user", "content": q})
-        messages.append({"role": "assistant", "content": json.dumps(response)})
-    messages.append({"role": "user", "content": query})
+        messages.append(HumanMessage(content=q))
+        messages.append(AIMessage(content=json.dumps(response)))
+    messages.append(HumanMessage(content=query))
 
-    client = get_client()
-    response = client.chat.completions.create(
-        model=GENERATION_MODEL,
-        messages=messages,
-        temperature=0.0,
-    )
-    content = response.choices[0].message.content.strip()
+    llm = _get_classifier_llm()
+    result = llm.invoke(messages)
+    content = result.content.strip()
 
     try:
         raw = json.loads(content)

@@ -6,12 +6,38 @@ family from the Gemini Flash generator to avoid self-evaluation bias.
 
 import json
 import logging
+import os
 import re
 
-from config.client import get_client
+from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
+
 from config.pipeline_config import EVAL_MODEL
 
+load_dotenv()
+
 logger = logging.getLogger(__name__)
+
+_BASE_URL = "https://openrouter.ai/api/v1"
+
+_judge_llm: ChatOpenAI | None = None
+
+
+def _get_judge_llm() -> ChatOpenAI:
+    """Return the shared LangChain ChatOpenAI instance for evaluation judging."""
+    global _judge_llm
+    if _judge_llm is None:
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise EnvironmentError("OPENROUTER_API_KEY is not set")
+        _judge_llm = ChatOpenAI(
+            model=EVAL_MODEL,
+            openai_api_key=api_key,
+            openai_api_base=_BASE_URL,
+            temperature=0.0,
+        )
+    return _judge_llm
 
 
 # ---------------------------------------------------------------------------
@@ -19,11 +45,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def _safe_parse_score(text: str) -> dict:
-    """Parse an LLM judge response into {"score": float, "reasoning": str}.
-
-    Handles markdown code fences and malformed JSON gracefully.
-    """
-    # Strip optional markdown code fences
+    """Parse an LLM judge response into {"score": float, "reasoning": str}."""
     cleaned = re.sub(r"^```(?:json)?\s*", "", text.strip())
     cleaned = re.sub(r"\s*```$", "", cleaned)
 
@@ -40,16 +62,13 @@ def _safe_parse_score(text: str) -> dict:
 
 def _judge(system_prompt: str, user_prompt: str) -> dict:
     """Call the judge model and return parsed score + reasoning."""
-    client = get_client()
-    response = client.chat.completions.create(
-        model=EVAL_MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0.0,
-    )
-    content = response.choices[0].message.content.strip()
+    llm = _get_judge_llm()
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=user_prompt),
+    ]
+    result = llm.invoke(messages)
+    content = result.content.strip()
     return _safe_parse_score(content)
 
 
