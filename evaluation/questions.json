@@ -250,6 +250,16 @@
     "extra_link": null
   },
   {
+    "id": "VO-9",
+    "temporality": "Version-sensitive",
+    "source": "Official",
+    "category": "Version-sensitive-Official",
+    "question": "What was Volibear's ult in 2020 pre-season?",
+    "expected_answer": "Thunder Claws",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-9-23-notes/",
+    "extra_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-10-12-notes/"
+  },
+  {
     "id": "VC-1",
     "temporality": "Version-sensitive",
     "source": "Community",
@@ -267,6 +277,16 @@
     "question": "How did the community react to the Shyvana rework?",
     "expected_answer": "Mixed to Negative; mains feel she has \"less agency\" and a \"useless\" W shield.",
     "ground_truth_link": "https://www.reddit.com/r/shyvanamains/comments/1rzapyr/the_reaction_to_shyvana_rework_is_the_reason_riot/",
+    "extra_link": null
+  },
+  {
+    "id": "VC-3",
+    "temporality": "Version-sensitive",
+    "source": "Community",
+    "category": "Version-sensitive-Community",
+    "question": "How did the players react to the Soraka rework in late 2014?",
+    "expected_answer": "The reaction was very negative. Players felt Soraka became too squishy because her heal (W - Astral Infusion) now cost 10% of her own Max HP, effectively forcing her to \"kill herself\" to save allies. Additionally, her damage was considered too low, and her new Q (Starcall) was criticized as an unreliable mechanic because the projectile was too slow to reliably hit enemies for the necessary self-healing.",
+    "ground_truth_link": "https://www.reddit.com/r/leagueoflegends/comments/2hy46l/why_the_soraka_rework_was_an_utter_failure/",
     "extra_link": null
   },
   {
@@ -298,6 +318,26 @@
     "expected_answer": "Riot: Adds durability; Community: Mains claim it's \"useless\"",
     "ground_truth_link": "https://www.leagueoflegends.com/en-ph/news/game-updates/league-of-legends-patch-26-6-notes/#:~:text=AP)%20true%20damage.-,W%20%2D%20Inferno%20Aegis,-Cooldown%3A%2012%20seconds",
     "extra_link": "https://www.reddit.com/r/shyvanamains/comments/1rkfi8i/lets_be_real_the_shyvana_rework_is_a_mess/"
+  },
+  {
+    "id": "VX-4",
+    "temporality": "Version-sensitive",
+    "source": "Cross-sourced",
+    "category": "Version-sensitive-Cross-sourced",
+    "question": "In 2013, how many wards could I place on the map at once if I wanted to light up the whole jungle?",
+    "expected_answer": "Before November 2013 (Patch 3.14): There was no limit. A single player (usually the Support) could buy and place as many Stealth Wards (75g) and Vision Wards (125g) as they could afford.\n\nAfter November 2013 (Patch 3.14): Riot introduced a hard limit. Each player could only have 3 Stealth Wards and 1 Vision Ward (now 100g and visible) on the map at any given time.",
+    "ground_truth_link": "https://lol.fandom.com/wiki/Patch_3.14#:~:text=Vision-,Wards,-Context%3A%20Support%20players",
+    "extra_link": null
+  },
+  {
+    "id": "VX-5",
+    "temporality": "Version-sensitive",
+    "source": "Cross-sourced",
+    "category": "Version-sensitive-Cross-sourced",
+    "question": "What was Poppy's ultimate in November 2015?",
+    "expected_answer": "In November 2015, Poppy's ultimate was Diplomatic Immunity. It allowed her to target one enemy champion and become completely immune to all damage and crowd control from every other source (including towers and the rest of the enemy team) for up to 8 seconds.",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/Poppy/LoL/History#:~:text=Details-,Diplomatic%20Immunity,-COST%3A",
+    "extra_link": null
   },
   {
     "id": "MO-1",
@@ -350,6 +390,16 @@
     "extra_link": null
   },
   {
+    "id": "MO-6",
+    "temporality": "Mixed",
+    "source": "Official",
+    "category": "Mixed-Official",
+    "question": "I used to be able to use Smite to heal. What season was this and how much healing effect?",
+    "expected_answer": "Smite featured direct healing from Season 5 (Patch 4.20) through Season 12 (Patch 12.21). The values varied, but the healing effect peaked at 90 (+10% max health). As of Season 13 (Patch 12.22), the heal was removed and shifted to the Jungle Companion mechanic.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-12-22-notes/#:~:text=We%E2%80%99re%20taking%20the%20healing%20power%20out%20of%20Smite%20and%20Gromp%20and%20spreading%20it%20across%20the%20jungle%20with%20the%20jungle%20companions.",
+    "extra_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-12-10-notes/#:~:text=Heal%2090%20(%2B10%25%20of%20max%20health)%20%E2%87%92%2080%20(%2B7.5%25%20of%20max%20health)"
+  },
+  {
     "id": "MC-1",
     "temporality": "Mixed",
     "source": "Community",
@@ -398,5 +448,25 @@
     "expected_answer": "Riot: Speeds up the \"dead time\" at the start of the match; Community: Mixed. It stops AFK deaths (Pro) but kills deep-warding strategies (Con).",
     "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-26-1-notes/#:~:text=accelerate%20the%20game%2C%20aiming%20at%20a%20much%20higher%20action%2C%20shorter%20game%20loop",
     "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/1q8vxqt/the_faster_minion_spawn_is_honestly_one_of_the/"
+  },
+  {
+    "id": "MX-3",
+    "temporality": "Mixed",
+    "source": "Cross-sourced",
+    "category": "Mixed-Cross-sourced",
+    "question": "What happened to Mythic items? I don't see them in the shop anymore.",
+    "expected_answer": "Mythic items were officially removed with the start of Season 14 (January 2024) in patch 14.1.",
+    "ground_truth_link": "https://www.leagueoflegends.com/en-us/news/game-updates/patch-14-1-notes/#:~:text=As%20of%20patch%2014.1%20we%20are%20officially%20retiring%20Mythic%20items%20from%20League",
+    "extra_link": "https://www.reddit.com/r/leagueoflegends/comments/192mnsu/patch_141_notes/"
+  },
+  {
+    "id": "MX-4",
+    "temporality": "Mixed",
+    "source": "Cross-sourced",
+    "category": "Mixed-Cross-sourced",
+    "question": "I remember Soraka used to be able to give mana to her teammates. Is this still possible, and how does her current E work compared to the old one?",
+    "expected_answer": "Soraka's mana-giving ability was removed in Patch 4.17 (September 2014). This change completely redefined her from a passive \"mana battery\" to an interactive \"combat medic.\"\n\nThe Old E (Infuse) was a point-and-click ability that allowed Soraka to instantly grant mana to an ally or silence a single enemy.\n\nThe New E (Equinox) is a ground-targeted zone that silences all enemies standing within its radius till they leave. When the zone disappears all enemies still remaining in the zone are rooted in place.",
+    "ground_truth_link": "https://leagueoflegends.fandom.com/wiki/V4.17",
+    "extra_link": null
   }
 ]
