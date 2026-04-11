@@ -1,5 +1,3 @@
-from config.settings import DATA_DIR
-
 # Processing (in characters)
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 128

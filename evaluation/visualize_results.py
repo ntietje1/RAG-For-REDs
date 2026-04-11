@@ -10,7 +10,6 @@ Generates seven charts from evaluation/results.json:
 """
 
 import json
-import os
 from collections import defaultdict
 from pathlib import Path
 

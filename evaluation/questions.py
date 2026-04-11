@@ -32,8 +32,3 @@ def load_questions(path: Path) -> list[dict]:
 
     logger.info("Loaded %d evaluation questions from %s", len(questions), path)
     return questions
-
-
-def generate_questions(documents_dir: Path, num_questions: int = 50) -> list[dict]:
-    """Auto-generate evaluation questions from the document corpus."""
-    raise NotImplementedError
