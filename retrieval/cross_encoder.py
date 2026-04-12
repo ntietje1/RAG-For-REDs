@@ -3,6 +3,8 @@
 import logging
 import math
 
+from langsmith import traceable
+
 from config.pipeline_config import CROSS_ENCODER_MODEL
 
 logger = logging.getLogger(__name__)
@@ -21,6 +23,7 @@ def get_cross_encoder():
     return _model
 
 
+@traceable(name="cross_encoder_score")
 def score_pairs(query: str, texts: list[str]) -> list[float]:
     """Score each (query, text) pair and return as a value within [0, 1] (sigmoid)."""
     if not texts:

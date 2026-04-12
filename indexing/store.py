@@ -2,6 +2,8 @@
 
 import uuid
 
+from langsmith import traceable
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
@@ -75,10 +77,12 @@ class VectorStore:
 
         self._client.upsert(collection_name=_COLLECTION, points=points)
 
+    @traceable(name="vector_query")
     def query(self, embedding: list[float], top_k: int = 5) -> list[dict]:
         """Return the top-k most similar documents (no filter)."""
         return self._search(embedding, top_k, query_filter=None)
 
+    @traceable(name="vector_query_filtered")
     def query_with_filter(
         self,
         embedding: list[float],
@@ -97,6 +101,7 @@ class VectorStore:
         query_filter = Filter(must=conditions) if conditions else None
         return self._search(embedding, top_k, query_filter=query_filter)
 
+    @traceable(name="vector_query_qdrant_filtered")
     def query_with_qdrant_filter(
         self,
         embedding: list[float],

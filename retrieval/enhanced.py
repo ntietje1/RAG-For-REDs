@@ -9,6 +9,8 @@ from typing import TypedDict
 
 from langgraph.graph import StateGraph, END
 
+from qdrant_client.models import FieldCondition, Filter, MatchValue
+
 from config.pipeline_config import AUTHORITY_FILTER_THRESHOLD, RERANK_CANDIDATE_K, TOP_K
 from indexing.embedder import embed_query
 from indexing.store import VectorStore

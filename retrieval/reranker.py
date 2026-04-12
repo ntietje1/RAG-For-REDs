@@ -2,6 +2,8 @@
 
 import math
 
+from langsmith import traceable
+
 from config.pipeline_config import MAX_PER_SOURCE, TEMPORAL_LAMBDA
 
 
@@ -26,6 +28,7 @@ def build_patch_index(versions: set[str]) -> dict[str, int]:
     return {v: i for i, v in enumerate(sorted(versions, key=_patch_sort_key))}
 
 
+@traceable(name="rerank")
 def rerank(
     candidates: list[dict],
     patch_index: dict[str, int],

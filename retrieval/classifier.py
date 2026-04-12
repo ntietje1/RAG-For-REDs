@@ -4,6 +4,7 @@ import json
 import logging
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langsmith import traceable
 
 from config.client import get_generation_llm
 from config.pipeline_config import AUTHORITY_LEVELS, TEMPORAL_SENSITIVITY_DEFAULTS
@@ -284,6 +285,7 @@ def _validate(raw: dict) -> dict:
 # Public API
 # ---------------------------------------------------------------------------
 
+@traceable(name="classify_query")
 def classify_query(
     query: str, current_patch: str, discrete_weights: bool = False
 ) -> dict:
