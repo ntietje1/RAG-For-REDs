@@ -10,11 +10,18 @@ Install the project and its pipeline dependencies:
 pip install -e ".[pipeline]"
 ```
 
-Copy `.env.example` to `.env` and populate your API key:
+Copy `.env.example` to `.env` and populate your API keys:
 
 ```
 OPENROUTER_API_KEY=your_key_here
+
+# LangSmith observability (optional — get key from https://smith.langchain.com/)
+LANGSMITH_API_KEY=your_langsmith_key_here
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT=rag-for-reds
 ```
+
+The `OPENROUTER_API_KEY` is required for all pipeline operations. The LangSmith variables are optional — when set, all pipeline runs are automatically traced and visible at [smith.langchain.com](https://smith.langchain.com/).
 
 ---
 
@@ -131,15 +138,19 @@ python scripts/run_retrieval.py
 | `--no-expansion` | off | Disable query expansion (alternate phrasings) |
 | `--discrete-weights` | off | Use discrete authority levels (`low`/`medium`/`high`) instead of continuous floats |
 
-The classifier now outputs additional fields alongside temporal scope and authority weights:
+The classifier outputs the following fields:
 - **reasoning** — chain-of-thought rationale explaining the classification
+- **temporal_scope** — `evergreen`, `version-sensitive`, or `mixed`
+- **temporal_sensitivity** — continuous float [0.0-1.0] used as the decay lambda
 - **target_patch** — the specific patch version referenced by the query (if any), used as the reference point for temporal decay instead of the latest patch
+- **authority_weights** — per-source relevance weights (continuous floats or discrete levels)
+- **alternate_queries** — 2-3 rephrased versions for query expansion
 
 ---
 
 ## Step 5 — Run the evaluation
 
-Runs all 30 evaluation questions through 4 ablation configurations (baseline, temporal-only, authority-only, full) and scores each with an LLM-as-judge (GPT-4o-mini) on four metrics: faithfulness, answer relevancy, context precision, and context recall.
+Runs all evaluation questions through 4 ablation configurations (baseline, temporal-only, authority-only, full) and scores each with an LLM-as-judge (GPT-4o-mini) on four metrics: faithfulness, answer relevancy, context precision, and context recall.
 
 ```bash
 # Full evaluation (all configs, all questions)
@@ -165,6 +176,73 @@ python -m evaluation.evaluate --questions evaluation/questions.json --output eva
 Results are printed as a comparison table broken down by temporality category (Evergreen, Version-sensitive, Mixed) and saved as JSON for further analysis.
 
 > **Cost note:** a full run makes ~690 API calls (4 configs x 30 questions x ~6 LLM calls each). At Gemini Flash + GPT-4o-mini rates this costs a few cents and takes ~15-20 minutes.
+
+---
+
+## LangSmith Observability
+
+The pipeline integrates with [LangSmith](https://smith.langchain.com/) for end-to-end tracing of every pipeline run. When enabled, all operations are recorded and viewable in the LangSmith dashboard.
+
+### Setup
+
+1. Create a free account at [smith.langchain.com](https://smith.langchain.com/) and generate an API key.
+2. Add the following to your `.env` file:
+
+```
+LANGSMITH_API_KEY=your_langsmith_key_here
+LANGSMITH_TRACING=true
+LANGSMITH_PROJECT=rag-for-reds
+```
+
+3. Run any pipeline command — traces are automatically uploaded. No code changes needed.
+
+### What is traced
+
+**Auto-traced** (LangChain/LangGraph operations):
+
+| Operation | Detail |
+|-----------|--------|
+| LLM calls | Full input prompts and output text for classifier, generator, and eval judge |
+| Token usage | Prompt/completion token counts and cost estimates per call |
+| Embedding calls | Model, latency, and dimensions for `embed_query()` / `embed_documents()` |
+| LangGraph nodes | Each node (classify, retrieve, rerank, generate) as a separate span with timing |
+| State transitions | Full pipeline state at each node boundary |
+
+**Manually instrumented** (`@traceable` decorators):
+
+| Function | Trace name | Detail |
+|----------|------------|--------|
+| `rerank()` | `rerank` | Candidate count, scoring parameters, final ranked results |
+| `score_pairs()` | `cross_encoder_score` | Query, text count, sigmoid-normalized scores |
+| `classify_query()` | `classify_query` | Query, current patch, full classification output |
+| `VectorStore.query()` | `vector_query` | Top-k, returned hit count |
+| `VectorStore.query_with_filter()` | `vector_query_filtered` | Filters applied, returned hit count |
+| `VectorStore.query_with_qdrant_filter()` | `vector_query_qdrant_filtered` | Qdrant filter object, returned hit count |
+
+### Trace tree
+
+Each `graph.invoke()` call produces a hierarchical trace:
+
+```
+graph.invoke("Is Zeri good right now?")
++-- classify_node
+|   +-- classify_query                  @traceable
+|   |   +-- ChatOpenAI.invoke           auto-traced (full prompt + response)
++-- retrieve_node
+|   +-- embed_query("Is Zeri...")       auto-traced
+|   +-- vector_query                    @traceable
+|   +-- embed_query("Zeri win rate")    auto-traced (alternate query)
+|   +-- vector_query                    @traceable
++-- rerank_node
+|   +-- rerank                          @traceable
+|   |   +-- cross_encoder_score         @traceable
++-- generate_node
+    +-- ChatOpenAI.invoke               auto-traced (context + question + answer)
+```
+
+### Disabling tracing
+
+To disable LangSmith tracing, set `LANGSMITH_TRACING=false` in your `.env` file or remove the LangSmith variables entirely. The pipeline functions identically with or without tracing enabled.
 
 ---
 
