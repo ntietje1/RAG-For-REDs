@@ -9,7 +9,7 @@ from typing import TypedDict
 
 from langgraph.graph import StateGraph, END
 
-from config.pipeline_config import RERANK_CANDIDATE_K, TOP_K
+from config.pipeline_config import AUTHORITY_FILTER_THRESHOLD, RERANK_CANDIDATE_K, TOP_K
 from indexing.embedder import embed_query
 from indexing.store import VectorStore
 from retrieval.generator import generate_answer
@@ -89,6 +89,30 @@ class EnhancedRAG:
         """No-op when classifier features are disabled."""
         return {"classification": {}}
 
+    def _build_retrieval_filter(self, classification: dict) -> Filter | None:
+        """Build a Qdrant Filter from classification output.
+
+        Returns ``None`` if filtering should be skipped (evergreen queries or
+        insufficient classification data).
+        """
+        temporal_sensitivity = classification.get("temporal_sensitivity", 0.0)
+        if temporal_sensitivity < 0.1:
+            return None
+
+        # Source exclusion: filter out sources with very low authority
+        must_not_conditions: list[FieldCondition] = []
+        authority_weights = classification.get("authority_weights", {})
+        for src, weight in authority_weights.items():
+            if weight < AUTHORITY_FILTER_THRESHOLD:
+                must_not_conditions.append(
+                    FieldCondition(key="source", match=MatchValue(value=src))
+                )
+
+        if not must_not_conditions:
+            return None
+
+        return Filter(must_not=must_not_conditions)
+
     def _retrieve_node(self, state: PipelineState) -> dict:
         """Embed query (+ expansions) and retrieve candidates from vector store."""
         classification = state.get("classification", {})
@@ -97,18 +121,54 @@ class EnhancedRAG:
         alt = classification.get("alternate_queries", []) if self.use_expansion else []
         all_queries = [question] + alt
 
+        # Build optional Qdrant filter (active whenever the classifier ran)
+        qdrant_filter = None
+        if classification:
+            qdrant_filter = self._build_retrieval_filter(classification)
+            if qdrant_filter:
+                logger.info("Applying retrieval filter: %s", qdrant_filter)
+
         seen: dict[str, dict] = {}
         for q in all_queries:
             embedding = embed_query(q)
-            for hit in self.store.query(embedding, top_k=self.candidate_k):
+            if qdrant_filter is not None:
+                hits = self.store.query_with_qdrant_filter(
+                    embedding, qdrant_filter, top_k=self.candidate_k,
+                )
+            else:
+                hits = self.store.query(embedding, top_k=self.candidate_k)
+            for hit in hits:
                 doc_id = hit.get("doc_id", id(hit))
                 if doc_id not in seen or hit["score"] > seen[doc_id]["score"]:
                     seen[doc_id] = hit
-        return {"candidates": list(seen.values())}
+
+        candidates = list(seen.values())
+
+        # Fallback: if filtered search returned too few results, re-run unfiltered
+        if qdrant_filter is not None and len(candidates) < self.final_k:
+            logger.warning(
+                "Filtered retrieval returned only %d candidates (need %d), "
+                "falling back to unfiltered search",
+                len(candidates), self.final_k,
+            )
+            for q in all_queries:
+                embedding = embed_query(q)
+                for hit in self.store.query(embedding, top_k=self.candidate_k):
+                    doc_id = hit.get("doc_id", id(hit))
+                    if doc_id not in seen or hit["score"] > seen[doc_id]["score"]:
+                        seen[doc_id] = hit
+            candidates = list(seen.values())
+
+        return {"candidates": candidates}
 
     def _rerank_node(self, state: PipelineState) -> dict:
         """Re-rank candidates using temporal decay, authority weights, and cross-encoder."""
         classification = state.get("classification", {})
+
+        # Pass continuous temporal sensitivity when temporal features are enabled
+        temporal_sensitivity = None
+        if self.use_temporal:
+            temporal_sensitivity = classification.get("temporal_sensitivity")
 
         results = rerank(
             candidates=state["candidates"],
@@ -120,6 +180,7 @@ class EnhancedRAG:
             query=state["question"],
             use_cross_encoder=self.use_cross_encoder,
             final_k=self.final_k,
+            temporal_sensitivity=temporal_sensitivity,
         )
 
         sources = [

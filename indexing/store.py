@@ -8,6 +8,7 @@ from qdrant_client.models import (
     FieldCondition,
     Filter,
     MatchValue,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
@@ -32,6 +33,16 @@ class VectorStore:
                 collection_name=_COLLECTION,
                 vectors_config=VectorParams(size=EMBEDDING_DIMENSION, distance=Distance.COSINE),
             )
+        # Ensure payload indexes for filtered retrieval (idempotent)
+        for field_name in ("patch_version", "source"):
+            try:
+                self._client.create_payload_index(
+                    collection_name=_COLLECTION,
+                    field_name=field_name,
+                    field_schema=PayloadSchemaType.KEYWORD,
+                )
+            except Exception:
+                pass  # Index already exists
 
     @staticmethod
     def _doc_to_payload(doc: Document) -> dict:
@@ -84,6 +95,15 @@ class VectorStore:
             for field, value in filters.items()
         ]
         query_filter = Filter(must=conditions) if conditions else None
+        return self._search(embedding, top_k, query_filter=query_filter)
+
+    def query_with_qdrant_filter(
+        self,
+        embedding: list[float],
+        query_filter: Filter,
+        top_k: int = 5,
+    ) -> list[dict]:
+        """Return top-k most similar documents matching a pre-built Qdrant Filter."""
         return self._search(embedding, top_k, query_filter=query_filter)
 
     def _search(

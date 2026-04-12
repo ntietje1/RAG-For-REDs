@@ -29,5 +29,11 @@ TEMPORAL_LAMBDA = {
 # Discrete authority levels (used when discrete_weights mode is enabled)
 AUTHORITY_LEVELS = {"low": 0.2, "medium": 0.5, "high": 1.0}
 
+# Continuous temporal: fallback mapping from discrete scope to sensitivity float
+TEMPORAL_SENSITIVITY_DEFAULTS = {"evergreen": 0.0, "mixed": 0.25, "version-sensitive": 0.5}
+
+# Hybrid retrieval: sources with authority weight below this are excluded in pre-filter
+AUTHORITY_FILTER_THRESHOLD = 0.2
+
 # Evaluation
 EVAL_MODEL = "openai/gpt-4o-mini"

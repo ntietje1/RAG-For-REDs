@@ -6,7 +6,7 @@ import logging
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 from config.client import get_generation_llm
-from config.pipeline_config import AUTHORITY_LEVELS
+from config.pipeline_config import AUTHORITY_LEVELS, TEMPORAL_SENSITIVITY_DEFAULTS
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ _PREAMBLE = """\
 You are a query classifier for a League of Legends knowledge system.
 The current patch is {current_patch}.
 
-Given a user query, output a JSON object with exactly five fields:
+Given a user query, output a JSON object with exactly six fields:
 
 1. "reasoning": a 1-2 sentence explanation of why you chose the values below. \
 Think step-by-step before committing to a classification.
@@ -37,7 +37,14 @@ Think step-by-step before committing to a classification.
 (e.g. "patch 25.S1.3"), output that version string. \
 For queries about the current state, comparing multiple patches, or with no patch reference, output null.
 
-4. "authority_weights": an object with a weight for each source type:
+4. "temporal_sensitivity": a float between 0.0 and 1.0 indicating how much \
+the answer depends on recency.
+   - 0.0: completely evergreen, patch version is irrelevant
+   - 0.5: moderately time-sensitive, recent patches preferred but older info still useful
+   - 1.0: highly version-sensitive, only the exact patch(es) matter
+   This should be consistent with temporal_scope but provides finer granularity.
+
+5. "authority_weights": an object with a weight for each source type:
    - "riot_patch_notes": official Riot Games patch notes
    - "lolalytics": champion statistics (win rate, pick rate, tier)
    - "wiki": League of Legends community wiki (abilities, items, mechanics)
@@ -57,7 +64,7 @@ _AUTHORITY_DISCRETE = """\
 """
 
 _FOOTER = """\
-5. "alternate_queries": a list of 2-3 rephrased versions of the query that use \
+6. "alternate_queries": a list of 2-3 rephrased versions of the query that use \
 different wording, synonyms, or more specific terms to help retrieve relevant information.
 
 Respond with ONLY the JSON object, no other text."""
@@ -101,50 +108,62 @@ _EXAMPLE_SHARED = [
     # 1
     {"reasoning": "This asks about a specific ability, which is stable game knowledge documented on the wiki.",
      "temporal_scope": "evergreen", "target_patch": None,
+     "temporal_sensitivity": 0.0,
      "alternate_queries": ["Zeri Ultrashock Laser ability description", "Zeri W spell effect"]},
     # 2
     {"reasoning": "This asks about balance changes in a specific patch. Patch notes are the primary source.",
      "temporal_scope": "version-sensitive", "target_patch": "25.S1.3",
+     "temporal_sensitivity": 0.9,
      "alternate_queries": ["Zeri balance changes patch 25.S1.3", "Zeri nerfs buffs 25.S1.3"]},
     # 3
     {"reasoning": "Asking about current strength requires up-to-date stats and community perception.",
      "temporal_scope": "version-sensitive", "target_patch": None,
+     "temporal_sensitivity": 0.8,
      "alternate_queries": ["Zeri win rate current patch", "Zeri tier strength current meta"]},
     # 4
     {"reasoning": "This needs both stable mechanic knowledge and recent patch history, spanning multiple sources.",
      "temporal_scope": "mixed", "target_patch": None,
+     "temporal_sensitivity": 0.4,
      "alternate_queries": ["Jinx patch notes changes recent", "Jinx abilities passive rockets"]},
     # 5
     {"reasoning": "Item builds depend on the current meta but also require knowledge of item mechanics.",
      "temporal_scope": "mixed", "target_patch": None,
+     "temporal_sensitivity": 0.3,
      "alternate_queries": ["Kayn recommended item build guide", "Kayn Shadow Assassin Rhaast items current patch"]},
     # 6
     {"reasoning": "Comparing champion strength requires current stats and meta context.",
      "temporal_scope": "version-sensitive", "target_patch": None,
+     "temporal_sensitivity": 0.7,
      "alternate_queries": ["Jinx vs Caitlyn win rate current patch", "Jinx Caitlyn ADC comparison tier"]},
     # 7
     {"reasoning": "This asks for the changelog of a specific historical patch. Patch notes are authoritative.",
      "temporal_scope": "version-sensitive", "target_patch": "25.S1.2",
+     "temporal_sensitivity": 0.9,
      "alternate_queries": ["patch 25.S1.2 changelog all changes", "25.S1.2 balance updates champion items"]},
     # 8
     {"reasoning": "This is about game mechanic interactions, which are stable and documented on the wiki.",
      "temporal_scope": "evergreen", "target_patch": None,
+     "temporal_sensitivity": 0.0,
      "alternate_queries": ["Yasuo Wind Wall projectile block interactions", "Zeri Q blocked by Wind Wall"]},
     # 9
     {"reasoning": "Community sentiment requires Reddit discussion alongside official context about the changes.",
      "temporal_scope": "mixed", "target_patch": None,
+     "temporal_sensitivity": 0.3,
      "alternate_queries": ["jungle changes community reaction opinion", "new jungle update player feedback reddit"]},
     # 10
     {"reasoning": "Lore is stable game knowledge best documented on the wiki.",
      "temporal_scope": "evergreen", "target_patch": None,
+     "temporal_sensitivity": 0.0,
      "alternate_queries": ["Vi Jinx sisters lore Arcane", "Vi Jinx relationship backstory"]},
     # 11
     {"reasoning": "Hotfixes are tied to a specific patch. Patch notes and community discussion are key.",
      "temporal_scope": "version-sensitive", "target_patch": "25.S1.4",
+     "temporal_sensitivity": 0.9,
      "alternate_queries": ["patch 25.S1.4 hotfix emergency changes", "25.S1.4 hotfix bug fix balance"]},
     # 12
     {"reasoning": "This compares changes across multiple patches, so no single target patch applies.",
      "temporal_scope": "version-sensitive", "target_patch": None,
+     "temporal_sensitivity": 0.7,
      "alternate_queries": ["Volibear changes patch 26.4 26.5 26.6", "Volibear balance history recent patches"]},
 ]
 
@@ -212,6 +231,20 @@ def _validate(raw: dict) -> dict:
             logger.warning("Invalid target_patch %r, defaulting to None", target_patch)
             target_patch = None
 
+    # temporal_sensitivity: float [0.0, 1.0], fallback from temporal_scope
+    temporal_sensitivity = raw.get("temporal_sensitivity")
+    if temporal_sensitivity is not None:
+        try:
+            temporal_sensitivity = max(0.0, min(1.0, float(temporal_sensitivity)))
+        except (TypeError, ValueError):
+            temporal_sensitivity = None
+    if temporal_sensitivity is None:
+        temporal_sensitivity = TEMPORAL_SENSITIVITY_DEFAULTS.get(temporal_scope, 0.0)
+        logger.warning(
+            "temporal_sensitivity missing/invalid, derived %.2f from '%s'",
+            temporal_sensitivity, temporal_scope,
+        )
+
     raw_weights = raw.get("authority_weights", {})
     authority_weights = {}
     for source in _VALID_SOURCES:
@@ -241,6 +274,7 @@ def _validate(raw: dict) -> dict:
         "reasoning": reasoning,
         "temporal_scope": temporal_scope,
         "target_patch": target_patch,
+        "temporal_sensitivity": temporal_sensitivity,
         "authority_weights": authority_weights,
         "alternate_queries": alternate_queries,
     }

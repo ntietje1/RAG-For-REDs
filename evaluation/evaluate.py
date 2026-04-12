@@ -39,24 +39,28 @@ CONFIGS: dict[str, dict] = {
         "use_authority": False,
         "use_expansion": True,
         "use_cross_encoder": True,
+        "discrete_weights": False,
     },
     "temporal_only": {
         "use_temporal": True,
         "use_authority": False,
         "use_expansion": True,
         "use_cross_encoder": True,
+        "discrete_weights": True,
     },
     "authority_only": {
         "use_temporal": False,
         "use_authority": True,
         "use_expansion": True,
         "use_cross_encoder": True,
+        "discrete_weights": True,
     },
     "full": {
         "use_temporal": True,
         "use_authority": True,
         "use_expansion": True,
         "use_cross_encoder": True,
+        "discrete_weights": True,
     },
 }
 
