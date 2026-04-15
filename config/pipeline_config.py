@@ -19,17 +19,10 @@ MAX_PER_SOURCE = 4 # prevents one source from dominating all results after re-ra
 RERANK_CANDIDATE_K = 20  # Retrieve this many candidates before re-ranking
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 
-# Temporal decay: score *= e^(-lambda * age_in_patches)
-TEMPORAL_LAMBDA = {
-    "evergreen": 0.0,
-    "mixed": 0.25,
-    "version-sensitive": 0.5,
-}
-
 # Discrete authority levels (used when discrete_weights mode is enabled)
 AUTHORITY_LEVELS = {"low": 0.2, "medium": 0.5, "high": 1.0}
 
-# Continuous temporal: fallback mapping from discrete scope to sensitivity float
+# Default lambda mapping from discrete temporal scope to sensitivity float.
 TEMPORAL_SENSITIVITY_DEFAULTS = {"evergreen": 0.0, "mixed": 0.25, "version-sensitive": 0.5}
 
 # Hybrid retrieval: sources with authority weight below this are excluded in pre-filter

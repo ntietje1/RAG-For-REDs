@@ -74,6 +74,11 @@ def main():
         action="store_true",
         help="Use discrete authority levels (low/medium/high) instead of continuous floats",
     )
+    parser.add_argument(
+        "--continuous-temporal",
+        action="store_true",
+        help="Pass LLM-derived temporal_sensitivity float directly as λ (default: discrete scope lookup)",
+    )
     args = parser.parse_args()
 
     store = VectorStore()
@@ -85,6 +90,7 @@ def main():
         use_cross_encoder=args.cross_encoder,
         use_expansion=not args.no_expansion,
         discrete_weights=args.discrete_weights,
+        continuous_temporal=args.continuous_temporal,
         final_k=args.top_k,
     )
 

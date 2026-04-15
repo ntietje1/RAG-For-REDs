@@ -9,49 +9,41 @@ Generates seven charts from evaluation/results.json:
   4. Per-question heatmap – Individual question scores across strategies × metrics
 """
 
-import json
-from collections import defaultdict
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 
+from evaluation.utils import (
+    STRATEGY_ORDER,
+    STRATEGY_LABELS,
+    STRATEGY_COLORS as COLORS,
+    METRICS,
+    METRIC_LABELS,
+    TEMPORALITIES as CATEGORIES,
+    TEMP_ORDER_IDX,
+    RESULTS_PATH as RESULTS_FILE,
+    load_results,
+    active_strategies,
+    sort_questions,
+    aggregate,
+)
+
 # ── paths ──────────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent
-RESULTS_FILE = SCRIPT_DIR / "results.json"
 OUTPUT_DIR = SCRIPT_DIR / "charts"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-# ── style ───────────────────────────────────────────────────────────────────
-STRATEGIES = ["baseline", "temporal_only", "authority_only", "full"]
-STRATEGY_LABELS = {
-    "baseline": "Baseline",
-    "temporal_only": "Temporal Only",
-    "authority_only": "Authority Only",
-    "full": "Temporal + Authority",
-}
-METRICS = ["faithfulness", "answer_relevancy", "context_precision", "context_recall"]
-METRIC_LABELS = {
-    "faithfulness": "Faithfulness",
-    "answer_relevancy": "Relevancy",
-    "context_precision": "Context\nPrecision",
-    "context_recall": "Context\nRecall",
-}
-# Difficulty order for line chart
-CATEGORIES = ["Evergreen", "Mixed", "Version-sensitive"]
+# ── local display overrides ─────────────────────────────────────────────────
+# Category labels with question counts — only used in matplotlib axis ticks.
 CATEGORY_LABELS = {
-    "Evergreen": "Evergreen\n(17 Qs)",
-    "Mixed": "Mixed\n(13 Qs)",
+    "Evergreen":         "Evergreen\n(17 Qs)",
+    "Mixed":             "Mixed\n(13 Qs)",
     "Version-sensitive": "Version-sensitive\n(17 Qs)",
 }
 
-COLORS = {
-    "baseline":       "#4C72B0",
-    "full":           "#DD8452",
-    "temporal_only":  "#55A868",
-    "authority_only": "#C44E52",
-}
+# Matplotlib scatter marker shapes per strategy.
 MARKERS = {
     "baseline":       "o",
     "full":           "s",
@@ -67,39 +59,8 @@ plt.rcParams.update({
     "figure.dpi": 150,
 })
 
-
-# ── helpers ─────────────────────────────────────────────────────────────────
-
-def load_results(path: Path) -> dict:
-    with open(path) as f:
-        return json.load(f)
-
-
-def aggregate(entries: list, group_by: str | None = None) -> dict:
-    """
-    Returns {group_key: {metric: mean}} if group_by is given,
-    otherwise {metric: mean} for the whole list.
-    """
-    if group_by is None:
-        agg = defaultdict(list)
-        for e in entries:
-            for m in METRICS:
-                v = e["metrics"].get(m)
-                if v is not None:
-                    agg[m].append(v)
-        return {m: (sum(vs) / len(vs) if vs else 0) for m, vs in agg.items()}
-
-    groups: dict[str, dict[str, list]] = defaultdict(lambda: defaultdict(list))
-    for e in entries:
-        key = e.get(group_by, "Unknown")
-        for m in METRICS:
-            v = e["metrics"].get(m)
-            if v is not None:
-                groups[key][m].append(v)
-    return {
-        grp: {m: (sum(vs) / len(vs) if vs else 0) for m, vs in metrics.items()}
-        for grp, metrics in groups.items()
-    }
+# Module-level list; narrowed to strategies present in the file by main().
+STRATEGIES: list[str] = list(STRATEGY_ORDER)
 
 
 # ── chart 1: grouped bar ──────────────────────────────────────────────────────
@@ -130,7 +91,7 @@ def plot_grouped_bar(data: dict):
 
         ax.set_title(cat if cat == "Overall" else f"{cat}", fontsize=18, fontweight="bold")
         ax.set_xticks(x)
-        ax.set_xticklabels([METRIC_LABELS[m].replace("\n", " ") for m in METRICS], fontsize=13)
+        ax.set_xticklabels([METRIC_LABELS[m] for m in METRICS], fontsize=13)
         ax.set_ylim(0, 1.12)
         ax.set_ylabel("Score", fontsize=14)
         ax.tick_params(axis="y", labelsize=12)
@@ -190,7 +151,7 @@ def plot_diverging_delta(data: dict):
         ax.set_title(cat, fontsize=11)
         ax.set_yticks(y)
         if ax == axes[0]:
-            ax.set_yticklabels([METRIC_LABELS[m].replace("\n", " ") for m in METRICS])
+            ax.set_yticklabels([METRIC_LABELS[m] for m in METRICS])
         ax.xaxis.grid(True, linestyle="--", alpha=0.4)
         ax.set_axisbelow(True)
         ax.set_xlabel("Δ vs Baseline")
@@ -286,19 +247,14 @@ def plot_question_heatmap(data: dict):
     Horizontal dividers separate temporality groups; group labels appear on the
     right side of the last column.  A single shared colour-bar sits at the bottom.
     """
-    TEMP_ORDER = ["Evergreen", "Mixed", "Version-sensitive"]
     TEMP_BAND_COLORS = {
-        "Evergreen":        "#d5f5e3",
-        "Mixed":            "#fef9e7",
+        "Evergreen":         "#d5f5e3",
+        "Mixed":             "#fef9e7",
         "Version-sensitive": "#fdedec",
     }
 
     # ── build a stable, sorted question list ──────────────────────────────
-    def sort_key(e):
-        order = {t: i for i, t in enumerate(TEMP_ORDER)}
-        return (order.get(e["temporality"], 99), e["id"])
-
-    sorted_entries = sorted(data["baseline"], key=sort_key)
+    sorted_entries = sort_questions(data["baseline"])
     q_ids   = [e["id"]          for e in sorted_entries]
     q_temps = [e["temporality"] for e in sorted_entries]
     id_to_row = {qid: i for i, qid in enumerate(q_ids)}
@@ -395,10 +351,7 @@ def plot_question_heatmap(data: dict):
         )
         ax.set_yticks(range(n_q))
         ax.set_yticklabels(q_ids, fontsize=6.5)
-        ax.set_title(
-            METRIC_LABELS[metric].replace("\n", " "),
-            fontsize=11, pad=6,
-        )
+        ax.set_title(METRIC_LABELS[metric], fontsize=11, pad=6)
         ax.tick_params(axis="x", which="both", length=0)
         ax.tick_params(axis="y", which="both", length=0)
 
@@ -423,8 +376,15 @@ def plot_question_heatmap(data: dict):
 # ── main ─────────────────────────────────────────────────────────────────────
 
 def main():
+    global STRATEGIES
+
     print(f"Loading {RESULTS_FILE} …")
-    data = load_results(RESULTS_FILE)
+    data = load_results()
+
+    # Narrow to strategies actually present in the file (e.g. partial runs).
+    STRATEGIES = active_strategies(data)
+    if not STRATEGIES:
+        raise ValueError("No known strategies found in results.json")
 
     print("Generating charts …")
     plot_grouped_bar(data)

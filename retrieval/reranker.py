@@ -4,7 +4,7 @@ import math
 
 from langsmith import traceable
 
-from config.pipeline_config import MAX_PER_SOURCE, TEMPORAL_LAMBDA
+from config.pipeline_config import MAX_PER_SOURCE, TEMPORAL_SENSITIVITY_DEFAULTS
 
 
 def _patch_sort_key(version: str) -> tuple:
@@ -49,10 +49,9 @@ def rerank(
       - use_cross_encoder + query: replace cosine with cross-encoder scores
       - temporal_scope: apply exponential decay based on patch age
       - target_patch: use this patch as the decay reference point instead of
-        current_patch (for historical patch queries)
-      - authority_weights: multiply by per-source weight
+        current_patch (for historical patch queries)adfsadfzxcZC
       - temporal_sensitivity: continuous float [0.0-1.0] used directly as λ
-        (overrides the discrete TEMPORAL_LAMBDA lookup when provided)
+        (overrides the TEMPORAL_SENSITIVITY_DEFAULTS scope lookup when provided)
     """
     if use_cross_encoder and query is not None:
         from retrieval.cross_encoder import score_pairs
@@ -63,11 +62,11 @@ def rerank(
         ce_scores = None
 
     # Continuous mode: use temporal_sensitivity directly as lambda
-    # Discrete mode (fallback): use TEMPORAL_LAMBDA lookup
+    # Discrete mode (fallback): derive from temporal_scope
     if temporal_sensitivity is not None:
         lam = temporal_sensitivity
     else:
-        lam = TEMPORAL_LAMBDA.get(temporal_scope, 0.0) if temporal_scope else 0.0
+        lam = TEMPORAL_SENSITIVITY_DEFAULTS.get(temporal_scope, 0.0) if temporal_scope else 0.0
 
     # Determine the reference point for temporal decay.  When the query targets
     # a specific historical patch, decay relative to that patch so chunks from
