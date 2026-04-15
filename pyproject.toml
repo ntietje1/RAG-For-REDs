@@ -23,6 +23,7 @@ dependencies = [
     "langsmith>=0.3.0",
     "streamlit>=1.35.0",
     "plotly>=5.20.0",
+    "matplotlib>=3.10.8",
 ]
 
 [tool.setuptools.packages.find]
