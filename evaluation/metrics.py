@@ -8,8 +8,9 @@ import json
 import logging
 import re
 
-from config.client import get_client
-from config.pipeline_config import EVAL_MODEL
+from langchain_core.messages import SystemMessage, HumanMessage
+
+from config.client import get_eval_llm
 
 logger = logging.getLogger(__name__)
 
@@ -19,11 +20,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 def _safe_parse_score(text: str) -> dict:
-    """Parse an LLM judge response into {"score": float, "reasoning": str}.
-
-    Handles markdown code fences and malformed JSON gracefully.
-    """
-    # Strip optional markdown code fences
+    """Parse an LLM judge response into {"score": float, "reasoning": str}."""
     cleaned = re.sub(r"^```(?:json)?\s*", "", text.strip())
     cleaned = re.sub(r"\s*```$", "", cleaned)
 
@@ -40,16 +37,12 @@ def _safe_parse_score(text: str) -> dict:
 
 def _judge(system_prompt: str, user_prompt: str) -> dict:
     """Call the judge model and return parsed score + reasoning."""
-    client = get_client()
-    response = client.chat.completions.create(
-        model=EVAL_MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=0.0,
-    )
-    content = response.choices[0].message.content.strip()
+    messages = [
+        SystemMessage(content=system_prompt),
+        HumanMessage(content=user_prompt),
+    ]
+    result = get_eval_llm().invoke(messages)
+    content = result.content.strip()
     return _safe_parse_score(content)
 
 

@@ -2,6 +2,8 @@
 
 import math
 
+from langsmith import traceable
+
 from config.pipeline_config import MAX_PER_SOURCE, TEMPORAL_LAMBDA
 
 
@@ -26,6 +28,7 @@ def build_patch_index(versions: set[str]) -> dict[str, int]:
     return {v: i for i, v in enumerate(sorted(versions, key=_patch_sort_key))}
 
 
+@traceable(name="rerank")
 def rerank(
     candidates: list[dict],
     patch_index: dict[str, int],
@@ -36,6 +39,7 @@ def rerank(
     query: str | None = None,
     use_cross_encoder: bool = False,
     final_k: int = 5,
+    temporal_sensitivity: float | None = None,
 ) -> list[dict]:
     """Re-rank candidates by: relevance_score * temporal_decay * authority_weight
     OR cosine_score * temporal_decay * authority_weight
@@ -47,6 +51,8 @@ def rerank(
       - target_patch: use this patch as the decay reference point instead of
         current_patch (for historical patch queries)
       - authority_weights: multiply by per-source weight
+      - temporal_sensitivity: continuous float [0.0-1.0] used directly as λ
+        (overrides the discrete TEMPORAL_LAMBDA lookup when provided)
     """
     if use_cross_encoder and query is not None:
         from retrieval.cross_encoder import score_pairs
@@ -56,7 +62,12 @@ def rerank(
     else:
         ce_scores = None
 
-    lam = TEMPORAL_LAMBDA.get(temporal_scope, 0.0) if temporal_scope else 0.0
+    # Continuous mode: use temporal_sensitivity directly as lambda
+    # Discrete mode (fallback): use TEMPORAL_LAMBDA lookup
+    if temporal_sensitivity is not None:
+        lam = temporal_sensitivity
+    else:
+        lam = TEMPORAL_LAMBDA.get(temporal_scope, 0.0) if temporal_scope else 0.0
 
     # Determine the reference point for temporal decay.  When the query targets
     # a specific historical patch, decay relative to that patch so chunks from

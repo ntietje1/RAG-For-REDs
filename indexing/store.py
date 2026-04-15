@@ -2,12 +2,15 @@
 
 import uuid
 
+from langsmith import traceable
+
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
     Distance,
     FieldCondition,
     Filter,
     MatchValue,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
@@ -32,6 +35,16 @@ class VectorStore:
                 collection_name=_COLLECTION,
                 vectors_config=VectorParams(size=EMBEDDING_DIMENSION, distance=Distance.COSINE),
             )
+        # Ensure payload indexes for filtered retrieval (idempotent)
+        for field_name in ("patch_version", "source"):
+            try:
+                self._client.create_payload_index(
+                    collection_name=_COLLECTION,
+                    field_name=field_name,
+                    field_schema=PayloadSchemaType.KEYWORD,
+                )
+            except Exception:
+                pass  # Index already exists
 
     @staticmethod
     def _doc_to_payload(doc: Document) -> dict:
@@ -64,10 +77,12 @@ class VectorStore:
 
         self._client.upsert(collection_name=_COLLECTION, points=points)
 
+    @traceable(name="vector_query")
     def query(self, embedding: list[float], top_k: int = 5) -> list[dict]:
         """Return the top-k most similar documents (no filter)."""
         return self._search(embedding, top_k, query_filter=None)
 
+    @traceable(name="vector_query_filtered")
     def query_with_filter(
         self,
         embedding: list[float],
@@ -84,6 +99,16 @@ class VectorStore:
             for field, value in filters.items()
         ]
         query_filter = Filter(must=conditions) if conditions else None
+        return self._search(embedding, top_k, query_filter=query_filter)
+
+    @traceable(name="vector_query_qdrant_filtered")
+    def query_with_qdrant_filter(
+        self,
+        embedding: list[float],
+        query_filter: Filter,
+        top_k: int = 5,
+    ) -> list[dict]:
+        """Return top-k most similar documents matching a pre-built Qdrant Filter."""
         return self._search(embedding, top_k, query_filter=query_filter)
 
     def _search(
