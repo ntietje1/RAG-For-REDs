@@ -1,5 +1,14 @@
 # Setup & Running the Pipeline
 
+> **Just want to explore results?** If you only want to visualise pre-computed evaluation results, you can skip all steps below and run the Streamlit UI directly:
+> ```bash
+> pip install -e ".[pipeline]"
+> streamlit run app.py
+> ```
+> The **Evaluation Results** tab loads `evaluation/results.json` from the repo and requires no Qdrant server or API keys.
+
+---
+
 ## Prerequisites
 
 **Python 3.10+** and **Docker** are required.
@@ -148,7 +157,23 @@ The classifier outputs the following fields:
 
 ---
 
-## Step 5 — Run the evaluation
+## Step 5 — Run the Streamlit UI
+
+The Streamlit app provides a browser-based interface for querying the pipeline and viewing evaluation results. It requires Steps 2–3 to be complete (Qdrant running with a populated index).
+
+```bash
+streamlit run app.py
+```
+
+The app opens at `http://localhost:8501` by default.
+
+**Query tab** — enter a question or pick one of the 40 evaluation questions from the dropdown. Use the sidebar to configure the pipeline.
+
+**Evaluation Results tab** — visualises the results from `evaluation/results.json` (produced by Step 6) as a summary table, metric breakdown bar charts, a precision/recall scatter plot, and a per-question heatmap.
+
+---
+
+## Step 6 — Run the evaluation
 
 Runs all evaluation questions through 4 ablation configurations (baseline, temporal-only, authority-only, full) and scores each with an LLM-as-judge (GPT-4o-mini) on four metrics: faithfulness, answer relevancy, context precision, and context recall.
 

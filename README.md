@@ -78,6 +78,13 @@ The pipeline integrates with **LangSmith** for end-to-end tracing. All LangChain
 
 See [SETUP.md](SETUP.md) for full installation and usage instructions.
 
+> **Quick start — evaluation results only:** To explore pre-computed results without setting up Qdrant or API keys, install dependencies and launch the UI directly:
+> ```bash
+> pip install -e ".[pipeline]"
+> streamlit run app.py
+> ```
+> Open the **Evaluation Results** tab to view metric breakdowns, charts, and per-question heatmaps from `evaluation/results.json`.
+
 ---
 
 ## Data & Resources
