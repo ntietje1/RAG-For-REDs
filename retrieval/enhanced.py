@@ -54,6 +54,7 @@ class EnhancedRAG:
         use_cross_encoder: bool = False,
         use_expansion: bool = True,
         discrete_weights: bool = False,
+        continuous_temporal: bool = False,
         candidate_k: int = RERANK_CANDIDATE_K,
         final_k: int = TOP_K,
     ):
@@ -63,6 +64,7 @@ class EnhancedRAG:
         self.use_cross_encoder = use_cross_encoder
         self.use_expansion = use_expansion
         self.discrete_weights = discrete_weights
+        self.continuous_temporal = continuous_temporal
         self.candidate_k = candidate_k
         self.final_k = final_k
 
@@ -167,9 +169,11 @@ class EnhancedRAG:
         """Re-rank candidates using temporal decay, authority weights, and cross-encoder."""
         classification = state.get("classification", {})
 
-        # Pass continuous temporal sensitivity when temporal features are enabled
+        # In continuous mode pass the LLM-derived float directly as λ.
+        # In discrete mode (default) leave it None so the reranker falls back
+        # to TEMPORAL_SENSITIVITY_DEFAULTS keyed by temporal_scope.
         temporal_sensitivity = None
-        if self.use_temporal:
+        if self.use_temporal and self.continuous_temporal:
             temporal_sensitivity = classification.get("temporal_sensitivity")
 
         results = rerank(

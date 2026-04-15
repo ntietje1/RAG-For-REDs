@@ -51,7 +51,7 @@ def rerank(
       - target_patch: use this patch as the decay reference point instead of
         current_patch (for historical patch queries)adfsadfzxcZC
       - temporal_sensitivity: continuous float [0.0-1.0] used directly as λ
-        (overrides the discrete TEMPORAL_LAMBDA lookup when provided)
+        (overrides the TEMPORAL_SENSITIVITY_DEFAULTS scope lookup when provided)
     """
     if use_cross_encoder and query is not None:
         from retrieval.cross_encoder import score_pairs

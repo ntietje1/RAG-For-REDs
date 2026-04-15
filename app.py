@@ -104,6 +104,7 @@ def get_pipeline(
         use_authority=use_authority,
         use_cross_encoder=use_cross_encoder,
         use_expansion=use_expansion,
+        continuous_temporal=False,
         final_k=5,
     )
 
@@ -127,7 +128,7 @@ def load_eval_results() -> dict | None:
 # ── Result renderer ───────────────────────────────────────────────────────────
 
 
-def render_result(result: dict, question: str) -> None:
+def render_result(result: dict, question: str, continuous_temporal: bool = False) -> None:
     st.markdown("---")
 
     # Answer
@@ -145,9 +146,10 @@ def render_result(result: dict, question: str) -> None:
                 st.markdown("**Temporal Scope**")
                 st.markdown(f":{color}[**{scope.upper()}**]")
 
-                sensitivity = clf.get("temporal_sensitivity", 0.0)
-                st.markdown("**Temporal Sensitivity**")
-                st.progress(float(sensitivity), text=f"{sensitivity:.2f}")
+                if continuous_temporal:
+                    sensitivity = clf.get("temporal_sensitivity", 0.0)
+                    st.markdown("**Temporal Sensitivity**")
+                    st.progress(float(sensitivity), text=f"{sensitivity:.2f}")
 
                 target = clf.get("target_patch")
                 if target:
@@ -396,6 +398,7 @@ with tab_query:
         render_result(
             st.session_state["last_result"],
             st.session_state.get("last_question", ""),
+            continuous_temporal=False,
         )
 
 # ==============================================================================
@@ -421,11 +424,6 @@ with tab_eval:
     # ── Results summary table  ─────────────────────────────────────────────────
 
     st.subheader("Evaluation Results Summary")
-    st.caption(
-        "Replicates the `_print_table` output from `evaluation/evaluate.py`. "
-        "Rows are grouped by temporality; columns are LLM-as-judge metrics. "
-        "Green gradient highlights the best-performing config per metric within each group."
-    )
 
     _PRINT_TABLE_ORDER = ["Evergreen", "Version-sensitive", "Mixed", "Overall"]
 
